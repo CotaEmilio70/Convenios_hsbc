@@ -27,3 +27,6 @@ ALTER TABLE `convenios`.`tipos_negociacion`
 
 ALTER TABLE `convenios`.`tipos_negociacion`
   ADD COLUMN `Con_descuento` bit(1) NOT NULL DEFAULT b'0' AFTER `Idcartaconv`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Con_excepcion` bit(1) NOT NULL DEFAULT b'0' AFTER `Con_descuento`;

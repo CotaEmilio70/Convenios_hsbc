@@ -148,6 +148,7 @@
         <input type="hidden" id="Tipo_convid_alt" name="Tipo_convid_alt" value="" class="form-control">
         <input type="hidden" id="Plazo_maximo" name="Plazo_maximo" value="" class="form-control">
         <input type="hidden" id="Con_descuento" name="Con_descuento" value="" class="form-control">
+        <input type="hidden" id="Con_excepcion" name="Con_excepcion" value="" class="form-control">
 
         <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
             <label class="control-label" for="Nombre">Fecha negociacion:</label>
@@ -324,7 +325,7 @@
                         Tipo de negociacion
                     </label>
                 </div>            
-                <div class="col-md-4 col-sm-4 col-xs-12 form-check">
+                <div class="col-md-4 col-sm-4 col-xs-12 form-check" id="divexcepcion" style="display: none;">
                     <input class="form-check-input" type="checkbox" value="" name="chkExcepcion" id="chkExcepcion">
                     <input type="hidden" id="hdExcepcion" name="hdExcepcion" value="0">
                     <label class="form-check-label" for="chkExcepcion">
@@ -869,6 +870,7 @@
                         $("#Tipo_convid").val(data.tipo_convid);
                         // $("#Tipo_convid_alt").val(data.tipo_convid_alt);
                         $("#Con_descuento").val(data.con_descuento);
+                        $("#Con_excepcion").val(data.con_excepcion);
 
                         var vSaldototal = parseFloat($("#Nsaldototal").val());
 
@@ -888,7 +890,6 @@
                             $('#divsaldos').hide();
                             $("#Quita_neg").val(0).attr('readonly', 'readonly');
                             $("#Importeapagar").val(vSaldototal).attr('readonly', 'readonly');
-                            //  $("#Importeapagar").val(addCommas(vSaldototal.toFixed(2))).attr('readonly', 'readonly'); 
                         }
 
                         $('#Totalpago').val(0);
@@ -903,8 +904,6 @@
                         }
 
                         if(data.solo_parcial == 1){
-                        // if(data.con_descuento == 0){
-                            
                             $('#divtablapagos').show();
                             $('#divtotalapagar').show();
                             $('#botonsimulador').hide();
@@ -917,11 +916,17 @@
                             },500)
 
                         }else{
-                            // $('#divfechaneg').hide();
                             $("#tDetalle tbody tr").remove();
                             $('#divtablapagos').hide();
                             $('#divtotalapagar').hide();
                             $('#botonsimulador').show();
+                        }
+                        if(data.con_excepcion == 1){
+                            $('#divexcepcion').show();
+                            $('#hdExcepcion').val(0)
+                        }else{
+                            $('#hdExcepcion').val(0)
+                            $('#divexcepcion').hide();
                         }
 
                     }
@@ -957,6 +962,7 @@
 
             var vEnfacultad = true;
             var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vExcepcion = parseInt( $("#hdExcepcion").val() );
 
             if (vApagar > 0 && vCondescuento == 1)
             {

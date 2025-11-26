@@ -463,6 +463,7 @@ class Convenios extends CI_Controller {
             $ObjectResponse['pct_antpo'] = $result_con->Pct_antpo;
             $ObjectResponse['nombre_nego'] = $result_con->Nombre;
             $ObjectResponse['con_descuento'] = $result_con->Con_descuento;
+            $ObjectResponse['con_excepcion'] = $result_con->Con_excepcion;
 
             $idcarta = $this->Pivotnegopdtocarta_model->GetByNegPdto($Idnego,$Numpdto);
             $ObjectResponse['tipo_convid'] = $idcarta;
@@ -1889,7 +1890,7 @@ class Convenios extends CI_Controller {
         $pdf->Output($nombre_archivo, 'D');
     }
 
-    function GenerarPdf6() {
+    function GenerarPdf6() {            // KRONER Liquidacion con descuento en exhibiciones
         $this->load->library('Pdf');
         $pdf = new Pdf('P', 'mm', 'A4', true, 'UTF-8', false);
         // $pdf->setData($this->session->Empresa, $this->session->Rfc);
@@ -2087,7 +2088,7 @@ class Convenios extends CI_Controller {
          $pdf->Ln($Interlin);
         $pdf->Write(5,"I. El pago será realizado directamente al número del crédito ".$Hconvenio->plastico_pago." a nombre de ".$Hconvenio->Nombre." en cualquier sucursal de HSBC MÉXICO, S.A., INSTITUCIÓN DE BANCA MÚLTIPLE, GRUPO FINANCIERO HSBC, en días y horas hábiles como a continuación se detalla:", $enlace="", $fondo=false, $alineacion="", $nueva_linea=true);
          $pdf->Ln($Interlin);
-        $pdf->Write(5,"II. El monto de Pago acordado y descrito a continuación le permitirá aplicarse como Pago parcial", $enlace="", $fondo=false, $alineacion="", $nueva_linea=true);
+        $pdf->Write(5,"II. El monto de Pago acordado y descrito a continuación le permitirá liquidar su adeudo de forma total", $enlace="", $fondo=false, $alineacion="", $nueva_linea=true);
         $pdf->writeHTML($Tabla_pagos, false, 0, true, 0);
          $pdf->Ln($Interlin);
         $pdf->Write(5,"En caso de no poder realizar su pago en sucursal y en efectivo realícelo por transferencia a la clave interbancaria: ".$Hconvenio->Spei_num_key, $enlace="", $fondo=false, $alineacion="L", $nueva_linea=true);
