@@ -138,4 +138,5 @@ $autoload['model'] = array("Users_model",
  "Tiposconvenios_model",
  "Tiposnego_model",
  "Pivotnegopdtocarta_model",
+ "causasnopago_model",
  "Convenios_model");

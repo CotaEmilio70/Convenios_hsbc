@@ -20,6 +20,7 @@ class Convdeta_model extends CI_Model {
         $this->db->select('*');
         $this->db->from('details_convenios');
         $this->db->where('Convenio_id', $Idconv);
+        $this->db->where('Cancelado', 0);
         $this->db->order_by("Fecha_pago", "DESC");
         $this->db->limit(1);
         
@@ -45,7 +46,7 @@ class Convdeta_model extends CI_Model {
         $this->db->select_sum('Importe_pago');
         $this->db->from('details_convenios');
         $this->db->where('Convenio_id', $Idconv);
-
+        $this->db->where('Cancelado', 0);
         $Query = $this->db->get();
         $Result = $Query->result();
         return $Result[0]->Importe_pago;
@@ -55,6 +56,12 @@ class Convdeta_model extends CI_Model {
     {
         $this->db->where('Convenio_id', $Idconv);
         $this->db->delete('details_convenios');
+    }
+
+    function CancelById($CancelDetail)
+    {
+        $this->db->where('Id', $CancelDetail['Id']);
+        return $this->db->update('details_convenios', $CancelDetail);
     }
 
 }

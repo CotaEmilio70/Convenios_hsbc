@@ -8,87 +8,143 @@
     </div>
 <?php } ?>
 <div class="panel panel-uni">
+
   <div class="panel-heading">
     <h3 class="panel-title">Detalles del convenio</h3>
   </div>
+
   <div class="panel-body">
     <div class="row">
         <div class="col-md-2 col-sm-2 col-xs-12">
             <label class="label-display-name">Cuenta:</label> 
-            <label><?= $Convenio->Cuenta_12d ?></label>
+            <label><?= $Convenio->Dmacct ?></label>
         </div>
         <div class="col-md-6 col-sm-6 col-xs-12">
             <label class="label-display-name">Nombre:</label> 
             <label><?= $Convenio->Nombre ?></label>
         </div>
         <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="label-display-name">Calle y num:</label> 
-            <label><?= $Convenio->Calle_num ?></label>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="label-display-name">Colonia:</label> 
-            <label><?= $Convenio->Colonia ?></label>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="label-display-name">Ciudad:</label> 
-            <label><?= $Convenio->Ciudad ?></label>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="label-display-name">Estado:</label> 
-            <label><?= $Convenio->Estado ?></label>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-3 col-sm-3 col-xs-12">
-            <label class="label-display-name">PAN:</label> 
-            <label><?= $Convenio->Cuenta_pan ?></label>
-        </div>
-        <div class="col-md-1 col-sm-1 col-xs-12">
-            <label class="label-display-name">C.P.:</label> 
-            <label><?= $Convenio->Cp ?></label>
-        </div>
-        <div class="col-md-1 col-sm-1 col-xs-12">
-            <label class="label-display-name">Suc:</label> 
-            <label><?= $Convenio->Sucursal ?></label>
-        </div>
-        <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Segmento:</label> 
-            <label><?= $Convenio->Segmento ?></label>
-        </div>
-        <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Q. max.:</label> 
-            <label><?= $Convenio->Quitamax ?></label>
-        </div>
-        <div class="col-md-2 col-sm-1 col-xs-12">
-            <label class="label-display-name">Cliente:</label> 
-            <label><?= $Convenio->Cliente ?></label>
+            <label class="label-display-name">Negociacion:</label> 
+            <label><?=  $this->Tiposnego_model->GetNombreByid($Convenio->Tipo_negoid) ?></label>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Saldo total:</label> 
-            <label><?= number_format($Convenio->Saldo_act,2) ?></label>
+            <label class="label-display-name">Plataforma:</label> 
+            <label><?= $Convenio->Plataforma ?></label>
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Capital:</label> 
-            <label><?= number_format($Convenio->Saldo_cap,2) ?></label>
+            <label class="label-display-name">Producto:</label> 
+            <label><?= $Convenio->Producto ?></label>
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Intereses:</label> 
-            <label><?= number_format($Convenio->Intereses,2) ?></label>
+            <label class="label-display-name">F. apertura:</label> 
+            <label><?= $Convenio->Fec_ape ?></label>
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="label-display-name">Comisiones:</label> 
-            <label><?= number_format($Convenio->Comisiones,2) ?></label>
+            <label class="label-display-name">M. castigo:</label> 
+            <label><?= $Convenio->Uxmescast ?></label>
         </div>
-        <div class="col-md-2 col-sm-2 col-xs-12 ">
-            <label class="label-display-name">Impuestos:</label> 
-            <label><?= number_format($Convenio->Impuestos,2) ?></label>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Saldo actual:</label> 
+            <label><?= number_format($Convenio->Uxtot_adeu,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Saldo contable:</label> 
+            <label><?= number_format($Convenio->Dmcurbal,2) ?></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Pago_minimo:</label> 
+            <label><?= number_format($Convenio->U6pag_min,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Saldo al corte:</label> 
+            <label><?= number_format($Convenio->U6sdo_cort,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Saldo vencido:</label> 
+            <label><?= number_format($Convenio->Dmamtdlq,2) ?></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Monto principal:</label> 
+            <label><?= number_format($Convenio->Uxcap_cred,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Saldo vencido:</label> 
+            <label><?= number_format($Convenio->Dmpayoff,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Int. Ordinarios:</label> 
+            <label><?= number_format($Convenio->Uxint_cred,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Int. Moratorios:</label> 
+            <label><?= number_format($Convenio->Uxmora_cred,2) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Conc. exigibles:</label> 
+            <label><?= number_format($Convenio->Uxexig_cre,2) ?></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Folio conv.:</label> 
+            <label><?= $Convenio->Folio_pre."-".str_pad($Convenio->Folio_cons, 4, "0", STR_PAD_LEFT) ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Fecha neg.:</label> 
+            <label><?= $Convenio->Fecha_neg ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Quita negociada:</label> 
+            <label><?= $Convenio->Quita_neg ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Excepcion:</label> 
+            <label><?= $Convenio->Excepcion ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Autorizacion:</label> 
+            <label><?= $Convenio->Auto_excep ?></label>
+        </div>
+
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Estatus:</label> 
+            <label><?= $Convenio->Estado_conv ?></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Negociado con:</label> 
+            <label><?= $Convenio->Saldo_usado ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Plastico/pago:</label> 
+            <label><?= $Convenio->plastico_pago ?></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Telefono.:</label> 
+            <label><?= $Convenio->Telefono ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Tipo tel.:</label> 
+            <label><?= $Convenio->Tipo_tel ?></label>
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="label-display-name">Email:</label> 
+            <label><?= $Convenio->Email ?></label>
         </div>
     </div>
 
@@ -117,13 +173,13 @@
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <div class="col-md-2 col-sm-2 col-xs-12 ">
+            <div class="col-md-12 col-sm-12 col-xs-12 ">
             <label class="label-display-name">Total a pagar:</label> 
             <label><?= number_format($Totalpago,2) ?></label>
         </div>
 
+        </div>
     </div>
 
     <div class="row">
@@ -165,7 +221,7 @@
         <?php } ?>
     </div>
     <div class="col-md-2 col-sm-3 col-xs-4">
-        <?php if(VerificarPermisos($IdUsuario, "Convenios", "Delete") && $Convenio->Cancelado ==0){ ?>
+        <?php if(VerificarPermisos($IdUsuario, "Convenios", "Delete") && $Convenio->Cancelado ==0 && $Convenio->Estado_conv ==0){ ?>
         <!-- <a class="btn btn-danger" style="float:right;width:100%" data-message-delete="El covenio se cancelará, ¿Desea continuar?">Cancelar</a> -->
         <a class="btn btn-danger" style="float:right;width:100%" id="btnCancel">Cancelar</a>
         <?php } ?>
@@ -189,7 +245,7 @@
         <div class="row">
             <div class="col-md-4 col-sm-6 col-xs-12">
                 <label class="label-control" for="txbUsuario">Usuario:</label>
-                <input type="text" id="txbUsuario" class="form-control fill" placeholder="Usuario" max-length="10">
+                <input type="text" id="txbUsuario" class="form-control" placeholder="Usuario" max-length="10">
             </div>
             <div class="col-md-8 col-sm-6 col-xs-12">
                 <label class="label-control" for="txbContrasena">Contraseña:</label>

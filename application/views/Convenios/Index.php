@@ -43,7 +43,7 @@
             <th>Tipo</th>
             <th>Fecha</th>
             <th>Creado por</th>
-            <th>Documento</th>
+            <th>Estado</th>
             <th></th>
             <th></th>
         </tr>
@@ -51,6 +51,23 @@
         <tbody>
         <?php
             foreach($Convenios as $Convenio){
+            switch ($Convenio->Estado_conv) {
+                case 0:
+                    $Estadotext= 'Simulador';
+                    $Coloredotext = 'color: #000';
+                    break;
+                case 1:
+                    $Estadotext= 'Autorizado';
+                    $Coloredotext = 'color: #12a14b';
+                    break;
+                case 99:
+                    $Estadotext= 'Cancelado';
+                    $Coloredotext = 'color: #ff0000';
+                    break;
+                default:
+                    $Estadotext= '';
+            }
+
         ?>
         <tr>
             <td><?= $Convenio->Folio_pre."-".str_pad($Convenio->Folio_cons, 4, "0", STR_PAD_LEFT) ?></td>
@@ -59,31 +76,30 @@
             <td><?= $this->Tiposnego_model->GetNombreByid($Convenio->Tipo_negoid) ?></td>
             <td><?= $Convenio->Fecha_emi ?></td>
             <td><?= $Convenio->CreatedBy ?></td>
-            <td>
-                <?php
-                    if($Convenio->Cancelado == 0)
-                    {
-                ?>
-                        <a href="#" class="descargar-recibo" folio="<?= $Convenio->Id ?>" tipo="<?= $Convenio->Tipo_convid ?>" style="color: #000">Descargar Pdf</a>
-                <?php
-                    }else{
-                ?>
-                        <span style="color: #ff0000">Cancelado</span>
-                <?php
-                    }
-                ?>
-            </td>
-
-            <td>
-                <?php if(VerificarPermisos($IdUsuario, "Convenios", "Edit") && $Convenio->Cancelado == 0){ ?>
-                <a href="<?= base_url() ?>Convenios/Edit/<?= $Convenio->Id ?>" style="color: #000">Editar</a>
-                <?php } ?>
-            </td>
+            <td style="<?= $Coloredotext ?>"><?= $Estadotext ?></td>
             <td>
                 <?php if(VerificarPermisos($IdUsuario, "Convenios", "Details")){ ?>
                 <a href="<?= base_url() ?>Convenios/Details/<?= $Convenio->Id ?>" style="color: #000">Detalles</a>
                 <?php } ?>
             </td>
+
+            <td>
+
+                <?php if(VerificarPermisos($IdUsuario, "Convenios", "Edit") && $Convenio->Cancelado == 0 && $Convenio->Estado_conv == 0){ ?>
+                    <a href="<?= base_url() ?>Convenios/Edit/<?= $Convenio->Id ?>" style="color: #000">Autorizar</a>
+                <?php }else{ ?>
+
+                    <?php
+                        if($Convenio->Cancelado == 0 && $Convenio->Estado_conv == 1)
+                        {
+                    ?>
+                            <a href="#" class="descargar-recibo" folio="<?= $Convenio->Id ?>" tipo="<?= $Convenio->Tipo_convid ?>" style="color: #000">Descargar Pdf</a>
+                    <?php
+                        }
+                    }?>
+
+            </td>
+
         </tr>
         <?php } ?>
         </tbody>
@@ -157,6 +173,17 @@
     <input type="hidden" name="Convenioid" id="Convenioid" class="folioid">
 <?= form_close() ?>
 
+<?= form_open_multipart('/Convenios/GenerarPdf7', array("id" => "frmGenerarPdf7")) ?>
+    <input type="hidden" name="Convenioid" id="Convenioid" class="folioid">
+<?= form_close() ?>
+
+<?= form_open_multipart('/Convenios/GenerarPdf8', array("id" => "frmGenerarPdf8")) ?>
+    <input type="hidden" name="Convenioid" id="Convenioid" class="folioid">
+<?= form_close() ?>
+
+<?= form_open_multipart('/Convenios/GenerarPdf9', array("id" => "frmGenerarPdf9")) ?>
+    <input type="hidden" name="Convenioid" id="Convenioid" class="folioid">
+<?= form_close() ?>
 
     <script>
         $(function()

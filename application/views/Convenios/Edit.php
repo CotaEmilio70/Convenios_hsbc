@@ -1,147 +1,290 @@
-<?php if($this->session->flashdata('message_edit')){?>
+<?php if($this->session->flashdata('message_create')){?>
     <div class="alert alert-<?= $this->session->flashdata('class') ?> alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-        <?= $this->session->flashdata('message_edit') ?>
+        <?= $this->session->flashdata('message_create') ?>
     </div>
 <?php } ?>
 <?= form_open_multipart('/Convenios/EditPost', array("id" => "frmEdit")) ?>
 
-<?php
-    $FechaHoraOriginal = $Convenio->Fecha_neg;
-    $Formatofechaneg = substr($FechaHoraOriginal,8,2)."/".substr($FechaHoraOriginal,5,2)."/".substr($FechaHoraOriginal,0,4);
-
-    $Convenio->Nombre = set_value("Nombre") != "" ? set_value("Nombre") : $Convenio->Nombre;
-?>
-
-<input type="hidden" name="Idconvenio" id="Idconvenio" value="<?= $Convenio->Id ?>">
 <div class="panel panel-uni">
   <div class="panel-heading">
-    <h3 class="panel-title">Editar convenio</h3>
+    <h3 class="panel-title">Editar/Autorizar convenio</h3>
   </div>
   <div class="panel-body">
 
     <div class="row">
         <div class="col-md-2 col-sm-2 col-xs-12">
             <label class="control-label" for="Cuenta">Cuenta:</label>
-            <input readonly type="text" autofocus name="Cuenta" id="Cuenta" value="<?= $Convenio->Cuenta_12d ?>" placeholder="Cuenta" class="form-control input-sm required-field fill" max-length="12">
+            <input readonly type="text" name="Cuenta" id="Cuenta" value="<?= $Convenio->Dmacct ?>" placeholder="Cuenta" class="form-control input-sm required-field just-number" max-length="19">
             <label class="control-label" style="display:none;">Este campo es obligatorio</label>
         </div>
-        <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="col-md-4 col-sm-4 col-xs-12">
             <label class="control-label" for="Nombre">Nombre:</label>
             <input readonly type="text" name="Nombre" id="Nombre" value="<?= $Convenio->Nombre ?>" placeholder="Nombre" class="form-control input-sm" max-length="100">
         </div>
+
         <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="control-label" for="Nombre">Calle y num:</label>
-            <input readonly type="text" name="Calle_num" id="Calle_num" value="<?= $Convenio->Calle_num ?>" placeholder="Calle y num" class="form-control input-sm" max-length="100">
+            <label class="control-label" for="txbClavenego">Tipo de negociacion:</label>
+             <div class="row">
+                <div class="col-md-4 col-sm-4 col-xs-4">
+                    <input type="hidden" id="txbClavenego" max-length="4" value="<?= $Convenio->Tipo_negoid ?>" class="form-control">
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <?php
+                        $Options = array(
+                            "" => "Seleccionar opción"
+                        );
+                        foreach($Tiposnego as $Tiponego)
+                        {
+                            $Options[$Tiponego->Id] = $Tiponego->Nombre;
+                        }
+                    ?>
+                    <?= form_dropdown(array('name' => 'Clavenego','id' => 'Clavenego', 'class' => 'form-control required-field'),$Options,  $Convenio->Tipo_negoid ) ?>
+                </div>
+            </div>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
         </div>
+
+        <div class="col-md-2 col-sm-3 col-xs-6" id="botonsimulador" style="margin-top:20px; display: none;">
+            <input class="btn btn-info" id="btnSimulador" style="float: right;width:100%;'" type="button" value="Simulador">
+        </div>
+
     </div>
+
     <div class="row">
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="control-label" for="Nombre">Colonia:</label>
-            <input readonly type="text" name="Colonia" id="Colonia" value="<?= $Convenio->Colonia ?>" placeholder="Colonia" class="form-control input-sm" max-length="100">
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="control-label" for="Nombre">Ciudad:</label>
-            <input readonly type="text" name="Ciudad" id="Ciudad" value="<?= $Convenio->Ciudad ?>" placeholder="Ciudad" class="form-control input-sm" max-length="100">
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <label class="control-label" for="Nombre">Estado:</label>
-            <input readonly type="text" name="Estado" id="Estado" value="<?= $Convenio->Estado ?>" placeholder="Estado" class="form-control input-sm" edtclass="todo" onkeyup = "Editvalue(event,this)" max-length="100">
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-3 col-sm-3 col-xs-12">
-            <label class="control-label" for="Nombre">PAN:</label>
-            <input readonly type="text" name="Cuenta_pan" id="Cuenta_pan" value="<?= $Convenio->Cuenta_pan ?>" placeholder="PAN" class="form-control input-sm required-field" edtclass="solo-numeros" onkeyup = "Editvalue(event,this)" max-length="20">
+        <div class="col-md-1 col-sm-1 col-xs-12">
+            <label class="control-label" for="Plataforma">Plataforma:</label>
+            <input readonly type="text" name="Plataforma" id="Plataforma" value="<?= $Convenio->Plataforma  ?>" placeholder="" class="form-control input-sm" max-length="3">
         </div>
         <div class="col-md-1 col-sm-1 col-xs-12">
-            <label class="control-label" for="Nombre">C.P.:</label>
-            <input readonly type="text" name="Cp" id="Cp" value="<?= $Convenio->Cp ?>" placeholder="C.P." class="form-control input-sm" max-length="5">
+            <label class="control-label" for="Productoweb">Producto:</label>
+            <input readonly type="text" name="Productoweb" id="Productoweb" value="<?= $Convenio->Producto ?>" placeholder="" class="form-control input-sm" max-length="3">
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Fec_ape">Fecha apertura:</label>
+            <input readonly type="text" name="Fec_ape" id="Fec_ape" value="<?= $Convenio->Fec_ape ?>" placeholder="" class="form-control input-sm" max-length="10">
         </div>
         <div class="col-md-1 col-sm-1 col-xs-12">
-            <label class="control-label" for="Nombre">Suc:</label>
-            <input readonly type="text" name="Sucursal" id="Sucursal" value="<?= $Convenio->Sucursal ?>" placeholder="Suc." class="form-control input-sm fill" max-length="4">
+            <label class="control-label" for="Mes_castigo">M.Castigo:</label>
+            <input readonly type="text" name="Mes_castigo" id="Mes_castigo" value="<?= $Convenio->Uxmescast ?>" placeholder="" class="form-control input-sm" max-length="10">
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Segmento:</label>
-            <input readonly type="text" name="Segmento" id="Segmento" value="<?= $Convenio->Segmento ?>" placeholder="Seg." class="form-control input-sm" onkeyup = "Editvalue(event,this)" max-length="20">
+            <label class="control-label" for="Saldo_act">Saldo actual:</label>
+            <input readonly type="text" name="Saldo_act" id="Saldo_act" value="<?= number_format($Convenio->Uxtot_adeu,2) ?>" placeholder="Saldo actual" class="form-control input-sm text-right" max-length="12">
+            <input type="hidden" id="Nsaldototal" name="Nsaldototal" value="<?= $Convenio->Uxtot_adeu ?>" class="form-control">
         </div>
-        <div class="col-md-1 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Q. max.:</label>
-            <input readonly type="text" name="Quita" id="Quita" value="<?= $Convenio->Quitamax ?>" placeholder="Quita" class="form-control input-sm" onkeyup = "Editvalue(event,this)" max-length="5">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Saldo_curbal">Saldo contable:</label>
+            <input readonly type="text" name="Saldo_curbal" id="Saldo_curbal" value="<?= number_format($Convenio->Dmcurbal,2) ?>" placeholder="Saldo contable" class="form-control input-sm text-right" max-length="12">
+            <input type="hidden" id="Nsaldocontab" name="Nsaldocontab" value="<?= $Convenio->Dmcurbal ?>" class="form-control">
         </div>
         <div class="col-md-1 col-sm-1 col-xs-12">
-            <label class="control-label" for="Nombre">Cliente:</label>
-            <input readonly type="text" name="Cliente" id="Cliente" value="<?= $Convenio->Cliente ?>" placeholder="Cliente" class="form-control input-sm" max-length="3">
+            <label class="control-label" for="Quita_st">Q.Max.ST:</label>
+            <input readonly type="text" name="Quita_st" id="Quita_st" value="<?= $Convenio->Quita_max_st ?>" placeholder="Quita_st" class="form-control input-sm text-right" max-length="5">
+        </div>
+        <div class="col-md-1 col-sm-1 col-xs-12">
+            <label class="control-label" for="Quita_sc">Q.Max.SC:</label>
+            <input readonly type="text" name="Quita_sc" id="Quita_sc" value="<?= $Convenio->Quita_max_sc ?>" placeholder="Quita_sc" class="form-control input-sm text-right" max-length="5">
         </div>
     </div>
-    <div class="row">
+
+<?php if( $Convenio->Plataforma == 'CYB'){?>
+
+    <div class="row" id="datostdc">
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Saldo actual:</label>
-            <input readonly type="text" name="Saldo_act" id="Saldo_act" value="<?= $Convenio->Saldo_act ?>" placeholder="Saldo actual" class="form-control input-sm text-right" max-length="12">
+            <label class="control-label" for="Pago_minimo">Pago minimo:</label>
+            <input readonly type="text" name="Pago_minimo" id="Pago_minimo" value="<?= number_format($Convenio->U6pag_min,2) ?>" placeholder="Pago minimo" class="form-control input-sm text-right" max-length="12">
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Capital:</label>
-            <input readonly type="text" name="Saldo_cap" id="Saldo_cap" value="<?= $Convenio->Saldo_cap ?>" placeholder="Capital" class="form-control input-sm text-right" edtclass="importe" onkeyup = "Editvalue(event,this)" max-length="12">
+            <label class="control-label" for="Saldo_corte">Saldo al corte:</label>
+            <input readonly type="text" name="Saldo_corte" id="Saldo_corte" value="<?= number_format($Convenio->U6sdo_cort,2) ?>" placeholder="Saldo_corte" class="form-control input-sm text-right" max-length="12">
         </div>
         <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Intereses:</label>
-            <input readonly type="text" name="Intereses" id="Intereses" value="<?= $Convenio->Intereses ?>" placeholder="Intereses" class="form-control input-sm text-right" max-length="12">
-        </div>
-        <div class="col-md-2 col-sm-2 col-xs-12">
-            <label class="control-label" for="Nombre">Comisiones:</label>
-            <input readonly type="text" name="Comisiones" id="Comisiones" value="<?= $Convenio->Comisiones ?>" placeholder="Comisiones" class="form-control input-sm text-right" max-length="12">
-        </div>
-        <div class="col-md-2 col-sm-2 col-xs-12 ">
-            <label class="control-label" for="Nombre">Impuestos:</label>
-            <input readonly type="text" name="Impuestos" id="Impuestos" value="<?= $Convenio->Impuestos ?>" placeholder="Impuestos" class="form-control input-sm text-right" max-length="12">
+            <label class="control-label" for="Saldo_vencido_tdc">Saldo vencido:</label>
+            <input readonly type="text" name="Saldo_vencido_tdc" id="Saldo_vencido_tdc" value="<?= number_format($Convenio->Dmamtdlq,2) ?>" placeholder="Saldo vencido" class="form-control input-sm text-right" max-length="12">
         </div>
     </div>
+
+<?php } else { ?>
+
+    <div class="row" id="datoskrn" >
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Mto_principal">Monto principal:</label>
+            <input readonly type="text" name="Mto_principal" id="Mto_principal" value="<?= number_format($Convenio->Uxcap_cred,2) ?>" placeholder="Mto. principal" class="form-control input-sm text-right" max-length="12">
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Saldo_vencido_krn">Saldo vencido:</label>
+            <input readonly type="text" name="Saldo_vencido_krn" id="Saldo_vencido_krn" value="<?= number_format($Convenio->Dmpayoff,2) ?>" placeholder="Saldo vencido" class="form-control input-sm text-right" max-length="12">
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Int_ordinarios">Int. ordinarios:</label>
+            <input readonly type="text" name="Int_ordinarios" id="Int_ordinarios" value="<?= number_format($Convenio->Uxint_cred,2) ?>" placeholder="Int. ordinarios" class="form-control input-sm text-right" max-length="12">
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Int_moratorios">Int. moratorios:</label>
+            <input readonly type="text" name="Int_moratorios" id="Int_moratorios" value="<?= number_format($Convenio->Uxmora_cred,2) ?>" placeholder="Int. moratorios" class="form-control input-sm text-right" max-length="12">
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Conc_exigibles">Conc. exigibles:</label>
+            <input readonly type="text" name="Conc_exigibles" id="Conc_exigibles" value="<?= number_format($Convenio->Uxexig_cre,2) ?>" placeholder="Conc. exigibles" class="form-control input-sm text-right" max-length="12">
+        </div>
+    </div>
+
+<?php } ?>
 
     <div class="row margin-top" style="margin-top:20px;">
-        <div class="col-md-2 col-sm-2 col-xs-12 ">
-            <label class="control-label" for="Nombre">Fecha neg::</label>
-            <input type="text" name="Fecha_neg" id="Fecha_neg" value="<?= $Formatofechaneg ?>" placeholder="Fecha neg." class="form-control input-sm datetimepicker" max-length="10">
+        <input type="hidden" id="Idconvenio" name="Idconvenio" value="<?= $Convenio->Id ?>" class="form-control">
+        <input type="hidden" id="Plasticopago" name="Plasticopago" value="" class="form-control">
+        <input type="hidden" id="Billing" name="Billing" value="" class="form-control">
+        <input type="hidden" id="Dmssnum" name="Dmssnum" value="" class="form-control">
+        <input type="hidden" id="Modalidad" name="Modalidad" value="" class="form-control">
+        <input type="hidden" id="Macro_gen" name="Macro_gen" value="" class="form-control">
+        <input type="hidden" id="Cepa" name="Cepa" value="" class="form-control">
+        <input type="hidden" id="Moneda" name="Moneda" value="<?= $Convenio->Moneda ?>" class="form-control">
+        <input type="hidden" id="Clienteweb" name="Clienteweb" value="" class="form-control">
+        <input type="hidden" id="Gpo_meta" name="Gpo_meta" value="" class="form-control">
+        <input type="hidden" id="Spei_num_key" name="Spei_num_key" value="" class="form-control">
+        <input type="hidden" id="Portafolio" name="Portafolio" value="" class="form-control">
+        <input type="hidden" id="Etapa" name="Etapa" value="" class="form-control">
+        <input type="hidden" id="Restitucion" name="Restitucion" value="" class="form-control">
+        <input type="hidden" id="Saldo_usado" name="Saldo_usado" value="<?= $Convenio->Saldo_usado ?>" class="form-control">
+        <input type="hidden" id="Soloparcial" name="Soloparcial" value="<?= $Datostiponego->Solo_parcial ?>" class="form-control">
+        <input type="hidden" id="Pct_antpo" name="Pct_antpo" value="<?= $Datostiponego->Pct_antpo ?>" class="form-control">
+        <input type="hidden" id="Mismo_mes" name="Mismo_mes" value="<?= $Datostiponego->Mismo_mes ?>" class="form-control">
+        <input type="hidden" id="Tipo_convid" name="Tipo_convid" value="<?= $Convenio->Tipo_convid ?>" class="form-control">
+        <input type="hidden" id="Tipo_convid_alt" name="Tipo_convid_alt" value="" class="form-control">
+        <input type="hidden" id="Plazo_maximo" name="Plazo_maximo" value="<?= $Datostiponego->Plazo_maximo ?>" class="form-control">
+        <input type="hidden" id="Con_descuento" name="Con_descuento" value="<?= $Datostiponego->Con_descuento ?>" class="form-control">
+        <input type="hidden" id="Con_excepcion" name="Con_excepcion" value="<?= $Convenio->Excepcion ?>" class="form-control">
+        <input type="hidden" id="hdAutoexcepcion" name="hdAutoexcepcion" value="<?= $Convenio->Auto_excep ?>" class="form-control">
+        <input type="hidden" id="Total_adeudo" name="Total_adeudo" value="<?= $Convenio->Uxtot_adeu ?>" class="form-control">
+        <input type="hidden" id="Saldo_contable" name="Saldo_contable" value="<?= $Convenio->Dmcurbal ?>" class="form-control">
+        <input type="hidden" id="hdPlazosok" name="hdPlazosok" value="1" class="form-control">
+        <input type="hidden" id="Grupoconv" name="Grupoconv" value="<?= $Convenio->Grupoconv ?>" class="form-control">
+
+        <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
+            <label class="control-label" for="Nombre">Fecha negociacion:</label>
+            <input readonly type="text" name="Fecha_neg" id="Fecha_neg" value="<?= $Fecha_neg ?>" placeholder="Fecha neg." class="form-control input-sm datetimepicker required-field" max-length="10">
+
+            <input class="btn btn-info" id="btnTableEdit" style="float: right; width:100%; margin-top:20px; display: none;" type="button" value="Editar pagos">
+            
         </div>
 
-        <div class="col-md-6 col-sm-6 col-xs-12 table-responsive">
+        <div class=" col-md-6 col-sm-6 col-xs-12 table-responsive" id="divtablapagos">
             <table class="table table-bordered table-condensed" id="tDetalle">
                 <thead>
                     <tr>
+                        <th width="15%" >Num.</th>
                         <th>Fecha pago</th>
                         <th>Importe</th>
-                        <th class="text-center"><span id="sAddRow" class="glyphicon glyphicon-plus" style="font-size:19px;color:#43ac6a;"></span></th>
+                        <th class="text-center" ><span id="sAddRow" class="glyphicon glyphicon-plus" style="font-size:19px;color:#43ac6a;"></span></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
+                        // Valores iniciales para la tabla
                         $Index = 0;
-                        foreach($Tblpagos as $Movimiento){
-                            $FechaHoraOriginal = $Movimiento->Fecha_pago;
-                            $Formatofechapag = substr($FechaHoraOriginal,8,2)."/".substr($FechaHoraOriginal,5,2)."/".substr($FechaHoraOriginal,0,4);
+                        //
+                        // Formamos la tabla con los registros del Detalles
+                        //
+                        foreach($Tblpagos as $Pago){
+                            $Partida = $Index+1;
+                            // Convertimos a formato de fecha las fechas de la funciones
+                            $FechaHoraOriginal = $Pago->Fecha_pago;
+                            $Hora = substr($FechaHoraOriginal,11,8);
+                            $Fecha = substr($FechaHoraOriginal,8,2)."/".substr($FechaHoraOriginal,5,2)."/".substr($FechaHoraOriginal,0,4);
                     ?>
                         <tr id="tr<?= $Index ?>" row="<?= $Index ?>" class="active">
-                            <td>
-                                <input onchange="ValidateDate(this);" type="text" name="lstDetalle[<?= $Index ?>][Fecha]" value="<?= $Formatofechapag ?>" class="form-control input-sm datetimepicker" row="<?= $Index ?>" placeholder="Fecha"  onkeypress="ChangeToPago(this);" id="lstFecha<?= $Index ?>" />
-                                <input type="hidden" name="lstDetalle[<?= $Index ?>][Active]" row="<?= $Index ?>" value="true" id="lstActive<?= $Index ?>" />
-                            </td>
-                            <td>
-                                <input onchange="AddNewRow(this);" type="text" name="lstDetalle[<?= $Index ?>][Pago]" value="<?= $Movimiento->Importe_pago ?>" class="form-control numeric-field input-sm text-right" row="<?= $Index ?>" max-length="10"  placeholder="Pago" id="lstPago<?= $Index ?>" />
-                            </td>
-                            <td align="center"><span onclick="EliminarDetalle(this)" row="<?= $Index ?>" class="glyphicon glyphicon-remove" style="font-size:19px;color:red;margin-top: 9px;"></span></td>
+                        <td>
+                            <input disabled type="text"  name="lstDetalle[<?= $Index ?>][Partida]" class="form-control numeric-field input-sm text-right" value="<?= $Partida ?>" row="<?= $Index ?>"  id="lstPartida<?= $Index ?>" />
+                        </td>
+                        <td>
+                            <input onchange="ValidateDate(this);" type="text"  name="lstDetalle[<?= $Index ?>][Fecha]" class="form-control input-sm datetimepicker" value="<?= $Fecha ?>" row="<?= $Index ?>" placeholder="Fecha"  onkeypress="ChangeToPago(this);" id="lstFecha<?= $Index ?>" />
+                            <input type="hidden" name="lstDetalle[<?= $Index ?>][Active]" value="true" id="lstActive<?= $Index ?>" />
+                        </td>
+                        <td>
+                            <input onchange="AddNewRow(this);"  type="text" name="lstDetalle[<?= $Index ?>][Pago]" class="form-control numeric-field input-sm text-right" value="<?= $Pago->Importe_pago ?>" row="<?= $Index ?>" max-length="10" id="lstPago<?= $Index ?>" />
+                        </td>
+                        <td align="center"><span onclick="EliminarDetalle(this)" row="<?= $Index ?>" class="glyphicon glyphicon-remove" style="font-size:19px;color:#FF0000;margin-top: 9px;"></span></td>
                         </tr>
                     <?php 
-
-                        $Index++;
+                            $Index++;
                         } 
-                    ?>                        
+                    ?>
                 </tbody>
             </table>
         </div>
 
-        <div class="col-md-2 col-sm-2 col-xs-12 ">
-            <label class="control-label" for="Nombre">Total a pagar:</label>
-            <input readonly type="text" name="Totalpago" id="Totalpago"  value="0" placeholder="Total" class="form-control input-sm text-right" max-length="12">
+        <div class="col-md-3 col-sm-3 col-xs-12 " id="divtotalapagar">
+            <label class="control-label" id="lblQuitaneg" ><?= $lblQuitaneg ?> </label>
+            <label class="control-label" id="lblImporteconvenio" > <?= $lblImporte ?> </label>
+            <label class="control-label" for="Nombre">Suma pagos:</label>
+            <input readonly type="text" name="Totalpago" id="Totalpago" placeholder="Total"  value="<?= number_format($Totalpago,2) ?>" class="form-control input-sm text-right" max-length="12">
+            <input type="hidden" id="nTotalpago" name="nTotalpago" value="<?= $Totalpago ?>" class="form-control">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12">
+            <label class="control-label" for="Llamada">Llamada:</label>
+            <select class="form-control" name="Llamada" id="Llamada" value="<?= $Convenio->Llamada ?>" >
+                    <option value="LLE" <?= $Convenio->Llamada == 'LLE' ? 'selected' : '' ?> >LLAMADA DE ENTRADA</option>
+                    <option value="LLS" <?= $Convenio->Llamada == 'LLS' ? 'selected' : '' ?> >LLAMADA SALIDA</option>
+                    <option value="LLW" <?= $Convenio->Llamada == 'LLW' ? 'selected' : '' ?> >LLAMADA DE ENTRADA WHATSAPP</option>
+            </select>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+        </div>
+
+        <div class="col-md-4 col-sm-4 col-xs-12">
+            <label class="control-label" for="txbCausanopago">Causa de no pago:</label>
+             <div class="row">
+                <div class="col-md-4 col-sm-4 col-xs-4">
+                    <input type="hidden" id="txbCausanopago" max-length="4" value="<?= $Convenio->Causanp ?>" class="form-control">
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <?php
+                        $Options = array(
+                            "" => "Seleccionar opción"
+                        );
+                        foreach($Causasnopago as $Causanp)
+                        {
+                            $Options[$Causanp->Clave] = $Causanp->Nombre;
+                        }
+                    ?>
+                    <?= form_dropdown(array('name' => 'Causanopago','id' => 'Causanopago', 'class' => 'form-control required-field'),$Options,  $Convenio->Causanp ) ?>
+                </div>
+            </div>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Telefono">Telefono:</label>
+            <input type="text" name="Telefono" id="Telefono" value="<?= $Convenio->Telefono ?>" placeholder="Tel." class="form-control input-sm required-field" max-length="10">
+        </div>
+
+        <div class="col-md-2 col-sm-2 col-xs-12">
+            <label class="control-label" for="Tipo_tel">Tipo:</label>
+            <select class="form-control" name="Tipo_tel" id="Tipo_tel" value="<?= $Convenio->Tipo_tel ?>" >
+                    <option value="Movil" <?= $Convenio->Tipo_tel == 'Movil' ? 'selected' : '' ?> >Movil</option>
+                    <option value="Fijo" <?= $Convenio->Tipo_tel == 'Fijo' ? 'selected' : '' ?> >Fijo</option>
+            </select>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+        </div>
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <label class="control-label" for="Email">Correo electrónico:</label>
+            <input type="text" name="Email" id="Email" value="<?= $Convenio->Email ?>" placeholder="Email" class="form-control input-sm required-field" max-length="100">
+            <input type="hidden" name="hdCorreovalido" id="hdCorreovalido" value="1">
+        </div>
+
+        <div class="col-md-2 col-sm-2 col-xs-12 form-check">
+            <input class="form-check-input" type="checkbox" value="" name="chkAutorizado" id="chkAutorizado" style="margin-left:10px;margin-top:30px;">
+            <input type="hidden" id="hdAutorizado" name="hdAutorizado" value="0">
+            <label class="form-check-label" for="chkFechasesp">
+                Autorizado
+            </label>
         </div>
 
     </div>
@@ -152,30 +295,11 @@
          </div>
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="col-md-12 col-sm-12 col-xs-12">
-                <textarea class="form-control" rows="3" name="Observaciones" id="Observaciones" onKeyUp="this.value=this.value.toUpperCase();" placeholder="Observaciones" max-length="250"><?= $Convenio->Observaciones ?></textarea>
+                <textarea class="form-control required-field" rows="3" name="Observaciones" id="Observaciones" onKeyUp="this.value=this.value.toUpperCase();" placeholder="Observaciones" max-length="250"><?= $Convenio->Observaciones ?></textarea>
             </div>
         </div>
     </div>
 
-
-     <div class="audit-fields" style="margin-top: 15px;">
-        <div class="row">
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                <label>Creado por: <?= $Createdby ?></label>
-            </div>
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                <label>Fecha de creación: <?= $Convenio->CreatedDate ?></label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                <label>Modificado por: <?= $Updatedby ?></label>
-            </div>
-            <div class="col-md-6 col-sm-6 col-xs-12">
-                <label>Fecha de modificación: <?= $Convenio->UpdatedDate ?></label>
-            </div>
-        </div>
-    </div>
   </div>
 </div>
         
@@ -191,34 +315,195 @@
 <!-- Ventana modal para edicion de datos-->
 
 <div class="modal fade" id="mEditarvalor" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">¡
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #4d4dff;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" style="color: #FFF;">Editar datos</h4>
+                </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-10 col-sm-10 col-xs-12">
+                                <label class="label-control">Ingrese el nuevo dato:</label>
+                                <input type="text" id="Nuevodato" class="form-control">
+                                <input type="hidden" id="Itemid">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12">
+                                <label class="label-control" for="txbUsuario">Usuario:</label>
+                                <input type="text" id="txbUsuario" class="form-control" placeholder="Usuario" max-length="10">
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <label class="label-control" for="txbContrasena">Contraseña:</label>
+                                <input type="password" id="txbContrasena" class="form-control" placeholder="Contraseña">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresar">Regresar</button>
+                            <button type="button" class="btn btn-primary" id="btnAutorizarOtros">Autorizar</button>
+                        </div>
+                   </div> 
+                </div>      
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana modal para autorizar edicion de pagos-->
+
+<div class="modal fade" id="mEditarpagos" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #4d4dff;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" style="color: #FFF;">Autorizacion para editar pagos</h4>
+                </div>
+                    <div class="row" style="margin-left:10px;margin-bottom:10px;">
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-check">
+                            <input class="form-check-input" type="checkbox" value="" name="chkFechasesp" id="chkFechasesp">
+                            <input type="hidden" id="hdFechasesp" name="hdFechasesp" value="0">
+                            <label class="form-check-label" for="chkFechasesp">
+                                Permitir fechas especiales
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-left:10px;margin-bottom:10px;">
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <label class="label-control" for="txbUsuariopag">Usuario:</label>
+                            <input type="text" id="txbUsuariopag" class="form-control" placeholder="Usuario" max-length="10">
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <label class="label-control" for="txbContrasenapag">Contraseña:</label>
+                            <input type="password" id="txbContrasenapag" class="form-control" placeholder="Contraseña">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresarpag">Regresar</button>
+                        <button type="button" class="btn btn-primary" id="btnAutorizarEdtPagos">Autorizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana modal para autorizar excepciones-->
+
+<div class="modal fade" id="mAutoexcep" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ff0000;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" style="color: #FFF;">Autorizar excepcion</h4>
+                </div>
+                    <div class="row" style="margin-left:10px;margin-bottom:10px;">
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <label class="label-control" for="txbUsuarioexc">Usuario:</label>
+                            <input type="text" id="txbUsuarioexc" class="form-control" placeholder="Usuario" max-length="10">
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <label class="label-control" for="txbContrasenaexc">Contraseña:</label>
+                            <input type="password" id="txbContrasenaexc" class="form-control" placeholder="Contraseña">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresarexc">Regresar</button>
+                        <button type="button" class="btn btn-primary" id="btnAutorizarAutoexcep">Autorizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana modal para el simulador-->
+
+<div class="modal fade" id="mSimulador" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header" style="background-color: #4d4dff;">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" style="color: #FFF;">Editar datos</h4>
+        <h4 class="modal-title" style="color: #FFF;">Simulador de convenios</h4>
       </div>
         <div class="modal-body">
+
+            <div class="row" style="margin-bottom:15px;">
+                <div class="col-md-8 col-sm-8 col-xs-12">
+                    <label class="form-check-label" id="lblTiponegociacion">
+                        Tipo de negociacion
+                    </label>
+                </div>            
+                <div class="col-md-4 col-sm-4 col-xs-12 form-check" id="divexcepcion" style="display: none;">
+                    <input class="form-check-input" type="checkbox" value="" name="chkExcepcion" id="chkExcepcion">
+                    <input type="hidden" id="hdExcepcion" name="hdExcepcion" value="0">
+                    <label class="form-check-label" for="chkExcepcion">
+                        Excepción
+                    </label>
+                </div>
+            </div>
+
+            <div id="divsaldos" style="display: none;">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="radioDefault" id="radioContable">
+                    <label class="form-check-label" for="radioContable" id="textoContable">
+                        <?= $Textosaldocontable ?>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="radioDefault" id="radioTotal" checked>
+                    <label class="form-check-label" for="radioTotal" id="textoTotal">
+                        <?= $Textosaldototal ?>
+                    </label>
+                </div>
+            </div>
+
             <div class="row">
-                <div class="col-md-10 col-sm-10 col-xs-12">
-                    <label class="label-control">Ingrese el nuevo dato:</label>
-                    <input type="text" id="Nuevodato" class="form-control">
-                    <input type="hidden" id="Itemid">
+
+                <div class="col-md-3 col-sm-3 col-xs-12">
+                    <label class="label-control">Total a pagar:</label>
+                    <input type="text" name="Importeapagar" id="Importeapagar" value="<?= $Convenio->Total_pago ?>" class="form-control input-sm importe text-right" max-length="10">
                 </div>
+
+                <div class="col-md-2 col-sm-2 col-xs-12">
+                    <label class="label-control">% Quita:</label>
+                    <input type="text" name="Quita_neg" id="Quita_neg" value="<?= $Convenio->Quita_neg ?>" class="form-control input-sm importe text-right" max-length="5">
+                </div>
+
+                <div class="col-md-2 col-sm-2 col-xs-12">
+                    <label class="label-control"># pagos:</label>
+                    <input type="text" name="Num_pagos" id="Num_pagos" value="0" class="form-control input-sm just-number text-right" max-length="2">
+                </div>
+
+                <div class="col-md-3 col-sm-3 col-xs-12">
+                    <label class="control-label" for="Periodicidad">Periodicidad:</label>
+                    <select class="form-control" name="Periodicidad" id="Periodicidad">
+                            <option value="U" style="display:none;" >Pago único</option>
+                            <option value="S">Semanal</option>
+                            <option value="Q">Quincenal</option>
+                            <option value="M">Mensual</option>
+                        </select>
+                    <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+                </div>
+                
             </div>
+
             <div class="row">
-                <div class="col-md-4 col-sm-4 col-xs-12">
-                    <label class="label-control" for="txbUsuario">Usuario:</label>
-                    <input type="text" id="txbUsuario" class="form-control" placeholder="Usuario" max-length="10">
+                <label class="control-label" id="lblAnticipo" ></label>
+
+                <div class="col-md-3 col-sm-3 col-xs-12 ">
+                    <label class="control-label" for="Nombre">Fecha inicial</label>
+                    <input type="text" name="Fecha_ini" value="<?= $Fecha_neg ?>" id="Fecha_ini"  placeholder="Fecha ini." class="form-control input-sm datetimepicker" max-length="10">
                 </div>
-                <div class="col-md-6 col-sm-6 col-xs-12">
-                    <label class="label-control" for="txbContrasena">Contraseña:</label>
-                    <input type="password" id="txbContrasena" class="form-control" placeholder="Contraseña">
-                </div>
+
+                <!-- <button type="button" class="btn btn-primary" id="btnGenerarPlan">Sugerir plan de pagos</button> -->
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresar">Regresar</button>
-                <button type="button" class="btn btn-primary" id="btnAutorizar">Autorizar</button>
+
+            <div class="modal-footer" style="margin-top:15px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnSimuladorBack">Regresar</button>
+                <button type="button" class="btn btn-primary" id="btnSimuladorOk">Generar simulación</button>
             </div>
+
         </div>
     </div>
   </div>
@@ -226,14 +511,49 @@
 
 <?php echo form_close() ?>
 
+<!-- // <script>
+// document.addEventListener('DOMContentLoaded', () => {
+//   document.querySelectorAll('input[type=text]').forEach( node => node.addEventListener('keypress', e => {
+//     if(e.keyCode == 13) {
+//       e.preventDefault();
+//     }
+//   }))
+// });
+// </script>
+ -->
 <script>
 
-    window.onload=CargarFunciones();
+    function parseDDMMYYYY(dateString) {
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in Date objects
+            const year = parseInt(parts[2], 10);
+            return new Date(year, month, day);
+        }
+        return null; // Or throw an error for invalid format
+    }
 
-    function CargarFunciones() {
-        AsignarFunciones();
-        ContarDetalles();
-    }    
+    function SelectTiponego()
+    {
+        var vFound = false;
+        $("#Clavenego option").each(function()
+        {
+            if($(this).val() == $("#txbClavenego").val())
+            {
+                $(this).prop("selected", true);
+                $("#Clavenego").parent().parent().parent().removeClass("has-error");
+                $("#Clavenego").parent().removeClass("has-error");
+                $("#Clavenego").parent().parent().next().hide();
+                vFound = true;
+            }
+        })
+
+        if(!vFound)
+        {
+            $("#Clavenego").val("");
+        }
+    }
 
     function AsignarClasesEdit()
     {
@@ -305,6 +625,8 @@
         return x1 + x2;
     }
 
+    window.onload=AsignarFunciones();
+
     function Editvalue(e,vElement) { 
       tecla = document.all ? e.keyCode : e.which; 
       if(tecla==113){
@@ -331,15 +653,19 @@
         },500)
 
       }  
-    } 
-
+    }
+    
     function ValidateDate(vElement)
     {
         // bootbox.alert("Si entro al validate.");
 
         var vFechaneg = $("#Fecha_neg").val();
+        var vMismomes = $("#Mismo_mes").val();
+        var vFechasesp = $("#hdFechasesp").val();
         var vFechapago = $(vElement).val();
         var vRow = $(vElement).attr("row");
+        var vPartida =  $("#lstPartida" + vRow).val();
+        var vTotpart = $("#tDetalle > tbody > tr").length;
 
         $("p.loader-gif").text("Verificando...");
         $(".loader-gif").show();
@@ -350,7 +676,10 @@
             data: {
                 Fechaneg: vFechaneg,
                 Fechapago: vFechapago,
-                Row: vRow
+                Partida: vPartida,
+                Totpart: vTotpart,
+                Mismomes: vMismomes,
+                Fechasesp: vFechasesp
             },
             type: "GET",
             contentType: 'text/json',
@@ -382,30 +711,21 @@
 
     }
 
-
     function AddNewRow(vElement)
     {
+        var vPlazomaximo = parseInt($("#Plazo_maximo").val());
+
         var vRow = $(vElement).attr("row");
         $("#tr" + vRow).addClass("active");
 
         var vTotalRegistros = 0;
-
-        // $("#tDetalle > tbody > tr.active").each(function()
-        // {
-        //     var vRow = $(this).attr("row");
-        //     var vActive = $("#lstActive" + vRow).val();
-        //     if(vActive == "true")
-        //     {
-        //         vTotalRegistros++;
-        //     }
-        // })
 
         $("#tDetalle > tbody > tr:visible").each(function()
         {
             vTotalRegistros++;
         })
 
-        if(vTotalRegistros <3){
+        if( vTotalRegistros < vPlazomaximo ){
             var vAddRow = true;
         }else{
             var vAddRow = false;
@@ -422,6 +742,9 @@
             var vCount = $("#tDetalle > tbody > tr").length;
 
             var vNewRow = '<tr id="tr' + vCount + '" row="' + vCount + '"  >\
+                                <td>\
+                                    <input disabled type="text" name="lstDetalle[' + vCount + '][Partida]" value="0" class="form-control numeric-field input-sm text-right" row="' + vCount + '" max-length="10" placeholder="" id="lstPartida' + vCount + '" />\
+                                </td>\
                                 <td>\
                                     <input onchange="ValidateDate(this);" type="text" name="lstDetalle[' + vCount + '][Fecha]" class="form-control input-sm datetimepicker" row="' + vCount + '" placeholder="Fecha"  onkeypress="ChangeToPago(this);" id="lstFecha' + vCount + '" />\
                                     <input type="hidden" name="lstDetalle[' + vCount + '][Active]" value="true" id="lstActive' + vCount + '" />\
@@ -446,8 +769,12 @@
 
     function ContarDetalles()
     {
+
+        var vSaldotot = parseFloat($("#Nsaldototal").val());
+        var vSoloparcial = $("#Soloparcial").val();
         var vTotalRegistros = 0;
         var vTotalPago = 0;
+        var vPartida = 1;
 
         $("#tDetalle > tbody > tr.active").each(function()
         {
@@ -455,38 +782,89 @@
             var vActive = $("#lstActive" + vRow).val();
             if(vActive == "true")
             {
+                $("#lstPartida" + vRow).val(vPartida);
                 vTotalRegistros++;
                 var vCantidad = parseFloat($("#lstPago" + vRow).val());
                 vTotalPago += parseFloat(vCantidad);
+                vPartida++;
             }
         })
-        // vTotalRegistros = vTotalRegistros == 0 ? "" : vTotalRegistros;
-        vTotalPago = vTotalPago == 0 ? "" : vTotalPago;
-        // $("#txbTotalRegistros").val(vTotalRegistros);
-        $("#Totalpago").val(addCommas(vTotalPago.toFixed(2)));
+        
+        if(vTotalPago <=0 ){
+            $("#Totalpago").val(0);
+            $("#nTotalpago").val(0);
+        }else{
+            $("#Totalpago").val(addCommas(vTotalPago.toFixed(2)));
+            $("#nTotalpago").val(vTotalPago.toFixed(2)); 
+        }
+
+        if(vSoloparcial != 1){
+            //$("#lblImporteInsuficiente").show();
+            //bootbox.alert("Aqui validamos la suma contra el importe a pagar");
+        }
+
+        if(vSoloparcial == 1 && vTotalPago >= (vSaldotot-1)){
+
+            // bootbox.alert("El importe es suficiente para liquidar la cuenta");
+
+            bootbox.confirm({
+                message: "El importe del pago podría liquidar el saldo, desea cambiar la negociacion a LIQUIDACION SIN DESCUENTO?",
+                callback: function(result)
+                {
+                    if(result)
+                    {
+                        $("#Clavenego").val(6).change();
+                    }
+                }
+            }); 
+
+        }
+
     }
 
     function EliminarDetalle(vElement)
     {
-        bootbox.confirm({
-            message: "El registro quedara eliminado, ¿Desea continuar?",
-            callback: function(result)
-            {
-                if(result)
+        var vRow = $(vElement).attr("row");
+
+        if( $("#lstPartida" + vRow).val() == 1 || $("#lstPartida" + vRow).val() == '1' ){
+
+            bootbox.confirm({
+                message: "Si elimina el pago inicial se borraran los subsecuentes, ¿Desea continuar?",
+                callback: function(result)
                 {
-                    var vRow = $(vElement).attr("row");
-
-                    $("#tr" + vRow).removeClass("active").hide();
-                    $("#lstActive"+vRow).val("0");
-
-                    ContarDetalles();
-                    setTimeout(function()
+                    if(result)
                     {
-                        $("#tDetalle > tbody > tr:visible").last().find("input").eq(0).focus();
-                    },100);
+                        $("#tr" + vRow).removeClass("active").hide();
+                        $("#lstActive"+vRow).val("0");
+
+                        ContarDetalles();
+                        setTimeout(function()
+                        {
+                            $("#tDetalle > tbody > tr:visible").last().find("input").eq(0).focus();
+                        },100);
+                    }
                 }
-            }
-        }); 
+            }); 
+
+        }else{
+            bootbox.confirm({
+                message: "El registro quedara eliminado, ¿Desea continuar?",
+                callback: function(result)
+                {
+                    if(result)
+                    {
+                        $("#tr" + vRow).removeClass("active").hide();
+                        $("#lstActive"+vRow).val("0");
+
+                        ContarDetalles();
+                        setTimeout(function()
+                        {
+                            $("#tDetalle > tbody > tr:visible").last().find("input").eq(0).focus();
+                        },100);
+                    }
+                }
+            }); 
+        }
     }
 
     function ChangeToPago(vElement)
@@ -503,6 +881,427 @@
 
     $(function()
     {
+
+        $("#chkAutorizado").change(function()
+        {
+            if( $(this).is(":checked") ){
+                $("#hdAutorizado").val("1");
+            }else{
+                $('#hdAutorizado').val("0");
+            }
+        })
+
+        $("#chkFechasesp").change(function()
+        {
+            if( $(this).is(":checked") ){
+                $("#hdFechasesp").val("1");
+            }else{
+                $('#hdFechasesp').val("0");
+            }
+        })
+
+        $("#chkExcepcion").change(function()
+        {
+            if( $(this).is(":checked") ){
+                // bootbox.alert( "Toda excepción requiere una autorizacion especial antes de guardar el convenio.");
+                $("#txbUsuarioexc").val(""),
+                $("#txbContrasenaexc").val(""),
+                $("#mSimulador").modal("hide");
+                $("#mAutoexcep").modal("show");
+            }else{
+                $('#hdExcepcion').val("0");
+            }
+            $("#Quita_neg").val(0);
+            $("#Importeapagar").val(0);
+        })
+
+        $("#txbClavenego").keypress(function(event)
+        {
+            if(event.charCode == 13)
+            {
+                SelectTiponego();
+            }
+        })
+
+        $("#txbClavenego").change(function()
+        {
+            SelectTiponego();
+        })
+
+        $("#Fecha_ini").change(function()
+        {
+            var vFechaneg = $("#Fecha_neg").val();
+            var vMismomes = $("#Mismo_mes").val();
+            var vFechasesp = $("#hdFechasesp").val();
+            var vFechapago = $(this).val();
+
+            $("p.loader-gif").text("Verificando...");
+            $(".loader-gif").show();
+
+            $.ajax({
+                url: $("#url").val() + '/Convenios/ValidaFecha/',
+                dataType: "json",
+                data: {
+                    Fechaneg: vFechaneg,
+                    Fechapago: vFechapago,
+                    Partida: 0,
+                    Totpart: 1,
+                    Mismomes: vMismomes,
+                    Fechasesp: vFechasesp
+                },
+                type: "GET",
+                contentType: 'text/json',
+                success: function (data) {
+
+                    if(data != null && data.errormsg !='')
+                    {
+                        $(".loader-gif").hide();
+                        bootbox.alert({
+                            message: data.errormsg,
+                            callback: function () {
+                                setTimeout(function()
+                                {
+                                    // $(this).val("").focus().select();
+                                    $("#Fecha_ini").val("").focus();
+                                },100)
+                            }
+                        })  
+                    }
+
+                    $(".loader-gif").hide();
+                    
+                },
+
+                error: function (error) {
+                    bootbox.alert(error.responseText);
+                }
+
+            });
+        })
+
+        $("#Clavenego").change(function()
+        {
+            $("#txbClavenego").val($(this).val());
+            var vIdnego = $(this).val();
+            var vPdtoweb = $("#Productoweb").val();
+            var vCuenta = $("#Cuenta").val();
+            var vMoneda = $("#Moneda").val();
+// 
+            $("p.loader-gif").text("Verificando...");
+            $(".loader-gif").show();
+            $.ajax({
+                url: $("#url").val() + '/Convenios/Datostiponego/',
+                dataType: "json",
+                data: {
+                    Idnego: vIdnego,
+                    Numpdto: vPdtoweb,
+                    Cuenta: vCuenta,
+                    Moneda: vMoneda
+                },
+                type: "GET",
+                contentType: 'text/json',
+                success: function (data) {
+
+                    if(data != null && data.errormsg !='')
+                    {
+                        $("#txbClavenego").val("");
+                        $(".loader-gif").hide();
+                        bootbox.alert({
+                            message: data.errormsg,
+                            callback: function () {
+                                setTimeout(function()
+                                {
+                                    $("#Clavenego").focus().select();
+                                },100)
+                            }
+                        })                        
+                    }
+
+                    if(data != null && data.errormsg =='')
+                    {
+                        // console.log(data);
+
+                        $(".loader-gif").hide();
+                        $("#lblTiponegociacion").text( data.nombre_nego );
+
+                        $("#Soloparcial").val(data.solo_parcial);
+                        $("#Plazo_maximo").val(data.plazo_maximo);
+                        $("#Mismo_mes").val(data.mismo_mes);
+                        $("#Pct_antpo").val(data.pct_antpo);
+                        $("#Tipo_convid").val(data.tipo_convid);
+                        $("#Con_descuento").val(data.con_descuento);
+                        $("#Con_excepcion").val(data.con_excepcion);
+
+                        var vSaldototal = parseFloat($("#Nsaldototal").val());
+
+                        if(data.pct_antpo > 0)
+                        {
+                            $("#lblAnticipo").text( "Esta negociacion requiere un "+data.pct_antpo+"% como pago inicial." );
+                        }else{
+                            $("#lblAnticipo").text( "" );
+                        }
+
+                        if(data.con_descuento == 1)
+                        {
+                            $('#divsaldos').show();
+                            $("#Quita_neg").val(0).removeAttr('readonly');
+                            $("#Importeapagar").val(0).removeAttr('readonly');
+                        }else{
+                            $('#divsaldos').hide();
+                            $("#Quita_neg").val(0).attr('readonly', 'readonly');
+                            $("#Importeapagar").val(vSaldototal).attr('readonly', 'readonly');
+                        }
+
+                        $('#Totalpago').val(0);
+
+                        if(data.plazo_maximo > 1)
+                        {
+                            $('#Num_pagos').val(2).removeAttr('readonly');
+                            $('#Periodicidad').val('S').removeAttr('readonly');
+                        }else{
+                            $('#Num_pagos').val(1).attr('readonly', 'readonly');
+                            $('#Periodicidad').val('U').attr('readonly', 'readonly');
+                        }
+
+                        if(data.solo_parcial == 1){
+                            $('#divtablapagos').show();
+                            $('#divtotalapagar').show();
+                            $('#botonsimulador').hide();
+
+                            $("#tDetalle tbody tr").remove();
+
+                            setTimeout(function()
+                            {
+                                $("#sAddRow").click();
+                            },500)
+
+                        }else{
+                            $("#tDetalle tbody tr").remove();
+                            $('#divtablapagos').hide();
+                            $('#divtotalapagar').hide();
+                            $('#botonsimulador').show();
+                        }
+                        if(data.con_excepcion == 1){
+                            $('#divexcepcion').show();
+                            $('#hdExcepcion').val(0)
+                        }else{
+                            $('#hdExcepcion').val(0)
+                            $('#divexcepcion').hide();
+                        }
+
+                    }
+                },
+                error: function (error) {
+                    bootbox.alert(error.responseText);
+                }
+            });
+        })    
+
+        $("#Num_pagos").change(function()
+        {
+            var vPlazomaximo = parseInt($("#Plazo_maximo").val()); 
+            var vNumpag = parseInt($(this).val());
+
+            if (vPlazomaximo > 1 && vNumpag == 1 )
+            {
+                bootbox.alert("Esta negociacion requiere un mínimo de 2 pagos y un máximo de "+vPlazomaximo);
+                $("#Num_pagos").val(2).focus();
+            }
+
+            if (vNumpag > vPlazomaximo )
+            {
+                bootbox.alert("El numero máximo de pagos para esta negociacion es de: "+vPlazomaximo);
+                $("#Num_pagos").val(vPlazomaximo).focus();
+            }
+
+        })  
+
+        $("#Importeapagar").change(function()
+        {
+
+            var vApagar = $(this).val();
+            var vQuita_st = parseFloat($("#Quita_st").val());
+            var vQuita_sc = parseFloat($("#Quita_sc").val());
+
+            var vSaldocontab = parseFloat($("#Nsaldocontab").val());
+            var vSaldototal = parseFloat($("#Nsaldototal").val());
+
+            var vEnfacultad = true;
+            var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vExcepcion = parseInt( $("#hdExcepcion").val() );
+
+            if (vApagar > 0 && vCondescuento == 1)
+            {
+
+                if ( $('input[id="radioContable"]').is(':checked') )
+                {
+                    var vQuitacalc =  (($("#Nsaldocontab").val() - vApagar )/$("#Nsaldocontab").val())*100  ;
+
+                    $("#Saldo_usado").val('C');
+                    if(vQuitacalc > vQuita_sc)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita_sc/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+
+                }else{
+                    var vQuitacalc = (($("#Nsaldototal").val() - vApagar )/$("#Nsaldototal").val()) *100 ;
+                    $("#Saldo_usado").val('T');
+                    if(vQuitacalc > vQuita_st)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldototal").val() - ($("#Nsaldototal").val() * (vQuita_st/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+                }
+
+                if(vEnfacultad)
+                {
+                    $("#Quita_neg").val(vQuitacalc.toFixed(2));
+
+                    if(vApagar < vPagocalc )
+                    {
+                        bootbox.alert("Por regla, el importe se ajustará de acuerdo los criterios del banco.");
+                        $("#Importeapagar").val(vPagocalc);
+                    }else{
+                        $("#Importeapagar").val(Math.ceil(vApagar));
+                    }
+
+                }else{
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuitacalc.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuitacalc+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                            $("#Quita_neg").val(0);
+                        }else{
+                            $("#Quita_neg").val(vQuitacalc.toFixed(2));
+                        }
+                        
+                    }else{
+                        bootbox.alert("El importe excede el maximo de quita autorizada.");
+                        $("#Quita_neg").val(0);
+                    }
+                }
+
+            }else{
+                $("#Quita_neg").val(0);
+            }
+
+        })    
+//
+        $("#Quita_neg").change(function()
+        {
+            var vQuita = parseFloat($(this).val());
+            var vQuita_st = parseFloat($("#Quita_st").val());
+            var vQuita_sc = parseFloat($("#Quita_sc").val());
+            var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vExcepcion = parseInt( $("#hdExcepcion").val() );
+            var vEnfacultad = true;
+
+            if (vQuita > 0 && vCondescuento == 1)
+            {
+                if ( $('input[id="radioContable"]').is(':checked') )
+                {
+                    var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita/100))  ;
+                    vPagocalc =  Math.ceil(vPagocalc)+1;
+
+                    $("#Saldo_usado").val('C');
+                    if(vQuita > vQuita_sc)
+                    {
+                        vEnfacultad =false;
+                    }
+                }else{
+                    var vPagocalc = $("#Nsaldototal").val() - ($("#Nsaldototal").val() * (vQuita/100))  ;
+                    vPagocalc =  Math.ceil(vPagocalc)+1;
+
+                    $("#Saldo_usado").val('T');
+                    if(vQuita > vQuita_st)
+                    {
+                        vEnfacultad =false;
+                    }
+                }
+
+                if(vEnfacultad)
+                {
+                    $("#Importeapagar").val(vPagocalc.toFixed(2));
+                }else{
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuita.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuita+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                           $("#Importeapagar").val(0);
+                        }else{
+                            $("#Importeapagar").val(vPagocalc.toFixed(2));
+                        }
+                    }else{
+                        bootbox.alert("El % indicado excede el maximo de quita autorizada.");
+                       $("#Importeapagar").val(0);
+                    }
+                }
+
+                // }else{
+                //     bootbox.alert("El % indicado excede el maximo de quita autorizada.");
+                //     $("#Importeapagar").val(0);
+                // }
+
+            }else{
+                $("#Importeapagar").val(0);
+            }
+
+        })    
+
+//
+        $('input[name="radioDefault"]').change(function()
+        {
+            var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vSaldocontab = parseFloat($("#Nsaldocontab").val());
+            var vSaldototal = parseFloat($("#Nsaldototal").val());
+
+            if ( $('input[id="radioContable"]').is(':checked') )
+            {
+                if(vCondescuento == 0){
+                    $("#Importeapagar").val(vSaldocontab);
+                    $("#Quita_neg").val(0);
+                }else{
+                    $("#Importeapagar").val(0);
+                    $("#Quita_neg").val(0);
+                }
+                $("#Saldo_usado").val('C');
+            }else{
+                if(vCondescuento == 0){
+                    $("#Importeapagar").val(vSaldototal);
+                    $("#Quita_neg").val(0);
+                }else{
+                    $("#Importeapagar").val(0);
+                    $("#Quita_neg").val(0);
+                }
+                $("#Saldo_usado").val('T');
+            }
+
+        })
+//
+        $("#Plataforma").change(function()
+        {
+            if($(this).val() == 'CYB')   
+            {
+                $('#datoskrn').hide();
+                $('#datostdc').show();
+                // $('#Cuenta').attr('max-length', 19);
+                // $('#Cuenta').addClass('fill');
+            }else{
+                $('#datoskrn').show();
+                $('#datostdc').hide();
+                // $('#Cuenta').attr('max-length', 8);
+                // $('#Cuenta').removeClass('fill');
+            }
+            AsignarFunciones();
+        })    
+
         $("#Cuenta").change(function()
         {
             var vCuenta = $(this).val();
@@ -519,20 +1318,6 @@
                 // contentType: 'application/json; charset=utf-8',
                 contentType: 'text/json',
                 success: function (data) {
-                    // if(data == null)
-                    // {
-                    //     $(this).val("");
-                    //     $(".loader-gif").hide();
-                    //     bootbox.alert({
-                    //         message: "No se encontró la cuenta o esta inactiva.",
-                    //         callback: function () {
-                    //             setTimeout(function()
-                    //             {
-
-                    //             },100)
-                    //         }
-                    //     })
-                    // }
 
                     if(data != null && data.errormsg !='')
                     {
@@ -559,26 +1344,66 @@
                         }
 
                         $("#Nombre").val(data.first);
-                        $("#Calle_num").val(data.home_street);
-                        $("#Ciudad").val(data.home_city);
-                        $("#Colonia").val(data.col_casa);
-                        $("#Cp").val(data.home_postal_code);
-                        $("#Sucursal").val(data.idcuenta);
-                        $("#Segmento").val(vSegmento);
-                        $("#Quita").val(data.quita);
-                        $("#Cliente").val(data.cliente);
-                        $("#Cuenta_pan").val(data.cuenta_pan);
+                        $("#Plasticopago").val(data.plasticopago);
+                        $("#Billing").val(data.billing);
+                        $("#Fec_ape").val(data.fec_ape);
+                        $("#Mes_castigo").val(data.mes_castigo);
+                        $("#Plataforma").val(data.plataforma);
 
-                        $("#Saldo_act").val( addCommas(data.saldo_total) );
-                        $("#Saldo_cap").val( addCommas(data.saldo_cap) );
-                        $("#Intereses").val( addCommas(data.intereses) );
-                        $("#Comisiones").val( addCommas(data.comisiones) );
-                        $("#Impuestos").val( addCommas(data.impuestos) );
+                        $("#Saldo_act").val( addCommas(data.saldo_total));
+                        $("#Saldo_curbal").val( addCommas(data.saldo_curbal));
+                        $("#Nsaldototal").val( data.saldo_total );
+                        $("#Nsaldocontab").val( data.saldo_curbal );
 
-                        // $("#Saldo_act").val(data.saldo_total);
+                        $("#Quita_st").val( data.quita_st );
+                        $("#Quita_sc").val( data.quita_sc );
 
-                        $("#Status").html('<h4 id="Status">'+data.status+'</h4>');
+                        $("#Pago_minimo").val( addCommas(data.pago_minimo));
+                        $("#Saldo_corte").val( addCommas(data.saldo_corte));
+                        $("#Saldo_vencido_tdc").val( addCommas(data.saldo_vencido_tdc));
+
+                        $("#Mto_principal").val( addCommas(data.mto_principal));
+                        $("#Int_ordinarios").val( addCommas(data.int_ordinarios));
+                        $("#Int_moratorios").val( addCommas(data.int_moratorios));
+                        $("#Conc_exigibles").val( addCommas(data.conc_exigibles));
+                        $("#Int_moratorios").val( addCommas(data.int_moratorios));
+                        $("#Total_adeudo").val( addCommas(data.total_adeudo));
+
+                        //bootbox.alert("Valor: "+data.total_adeudo);
+
+                        $("#Saldo_contable").val( addCommas(data.saldo_contable));
+
+                        $("#Saldo_vencido_krn").val( addCommas(data.saldo_vencido_krn));
+
+                        $("#Dmssnum").val(data.dmssnum);
+                        $("#Modalidad").val(data.modalidad);
+                        $("#Macro_gen").val( data.macro_gen);
+                        $("#Spei_num_key").val( data.spei_num_key);
+                        $("#Gpo_meta").val( data.gpo_meta);
+                        $("#Moneda").val( data.moneda);
+                        $("#Clienteweb").val( data.clienteweb);
+                        $("#Productoweb").val( data.productoweb);
+                        $("#Cepa").val( data.cepa);
+                        $("#Portafolio").val( data.portafolio);
+                        $("#Etapa").val( data.etapa);
+                        $("#Restitucion").val( data.restitucion);
+
+                        $("#textoContable").text( "Contable: "+$("#Saldo_curbal").val() );
+                        $("#textoTotal").text( "Total: "+$("#Saldo_act").val() );
+
+                        // $("#Status").html('<h4 id="Status">'+data.status+'</h4>');
+
+                        if(data.quita_st == 0 || data.quita_sc == 0){
+                            bootbox.alert("Es posible que las quitas autorizadas ya hayan expirado. Avise al supervisor.");
+                            $("#Quita_sc").parent().addClass("has-error");
+                            $("#Quita_st").parent().addClass("has-error");
+                        }else{
+                            $("#Quita_sc").parent().removeClass("has-error");
+                            $("#Quita_st").parent().removeClass("has-error");
+                        }
+
                         $(".loader-gif").hide();
+                        $('#Plataforma').trigger('change');
                     }
                 },
                 error: function (error) {
@@ -636,35 +1461,46 @@
             }
         })
 
+//
+        $("#btnSimulador").click(function()
+        {
+            var vLargocuenta=$("#Cuenta").val().length;
+            if(vLargocuenta>0){
+                $("#mSimulador").modal("show");
+            }else{
+                setTimeout(function()
+                {
+                    bootbox.alert("Debe indicar un numero de cuenta válido");
+                    $("#Cuenta").focus();   
+                },100)
+            }
+        })
+
+//
         $("#sAddRow").click(function()
         {
+            var vPlazomaximo = parseInt($("#Plazo_maximo").val());
+
             var vTotalRegistros = 0;
-
-            // $("#tDetalle > tbody > tr.active").each(function()
-            // {
-            //     var vRow = $(this).attr("row");
-            //     var vActive = $("#lstActive" + vRow).val();
-            //     if(vActive == "true")
-            //     {
-            //         vTotalRegistros++;
-            //     }
-            // })
-
             $("#tDetalle > tbody > tr:visible").each(function()
             {
                 vTotalRegistros++;
             })
 
-            if(vTotalRegistros <3){
+            if(vTotalRegistros < vPlazomaximo){
                 var vAddRow = true;
             }else{
                 var vAddRow = false;
             }
 
             var vCount = $("#tDetalle > tbody > tr").length;
+            var vPartida = vCount+1;
             if(vAddRow)
             {
                 var vNewRow = '<tr id="tr' + vCount + '" row="' + vCount + '" >\
+                                    <td>\
+                                        <input disabled type="text" name="lstDetalle[' + vCount + '][Partida]" value="' + vPartida + '" class="form-control numeric-field input-sm text-right" row="' + vCount + '" max-length="10" placeholder="" id="lstPartida' + vCount + '" />\
+                                    </td>\
                                     <td>\
                                         <input onchange="ValidateDate(this);" type="text" name="lstDetalle[' + vCount + '][Fecha]" class="form-control input-sm datetimepicker" row="' + vCount + '" placeholder="Fecha"  onkeypress="ChangeToPago(this);" id="lstFecha' + vCount + '" />\
                                         <input type="hidden" name="lstDetalle[' + vCount + '][Active]" value="true" id="lstActive' + vCount + '" />\
@@ -688,6 +1524,18 @@
             $(vItemid).focus();
         })
 
+        $("#btnRegresarpag").click(function()
+        {            
+            $("#btnTableEdit").focus();
+        })
+
+        $("#btnRegresarexc").click(function()
+        {
+            $('#chkExcepcion').prop('checked', false);        
+            $('#hdExcepcion').val("0");    
+            $("#mSimulador").modal("show");
+        })
+
         $("#txbUsuario").keypress(function()
         {
             if(event.charCode == 13)
@@ -700,11 +1548,79 @@
         {
             if(event.charCode == 13)
             {
-                $("#btnAutorizar").trigger("click");
+                $("#btnAutorizarOtros").trigger("click");
             }
         })
 
-        $("#btnAutorizar").click(function()
+        $("#txbUsuariopag").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#txbContrasenapag").focus();
+            }
+        })
+
+        $("#txbContrasenapag").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#btnAutorizarEdtPagos").trigger("click");
+            }
+        })
+
+        $("#txbUsuarioexc").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#txbContrasenaexc").focus();
+            }
+        })
+
+        $("#txbContrasenaexc").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#btnAutorizarAutoexcep").trigger("click");
+            }
+        })
+//
+        $("#btnAutorizarAutoexcep").click(function()
+        {
+            $("p.loader-gif").text("Verificando...");
+            $(".loader-gif").show();
+             $.ajax({
+                url: $("#url").val() + '/Users/AutorizacionSuperv/',
+                dataType: "json",
+                data: {
+                    Usuario: $("#txbUsuarioexc").val(),
+                    Contrasena: $("#txbContrasenaexc").val(),
+                },
+                type: "GET",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if(data.length == 0)
+                    {
+                        $(".loader-gif").hide();
+                        // vAutorizado = true;
+                        $("#hdAutoexcepcion").val($("#txbUsuarioexc").val());
+                        $('#hdExcepcion').val("1");
+                        $("#mAutoexcep").modal("hide");
+                        $("#mSimulador").modal("show");
+                    }else
+                    {
+                        $("#hdAutoexcepcion").val("");
+                        $('#hdExcepcion').val("0");
+                        bootbox.alert(data);
+                        $(".loader-gif").hide();
+                    }
+                },
+                error: function (error) {
+                    bootbox.alert(error.responseText);
+                }
+            });
+        })
+//
+        $("#btnAutorizarOtros").click(function()
         {
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
@@ -739,34 +1655,320 @@
             });
         })
 
+        $("#btnAutorizarEdtPagos").click(function()
+        {
+            $("p.loader-gif").text("Verificando...");
+            $(".loader-gif").show();
+             $.ajax({
+                url: $("#url").val() + '/Users/AutorizacionSuperv/',
+                dataType: "json",
+                data: {
+                    Usuario: $("#txbUsuariopag").val(),
+                    Contrasena: $("#txbContrasenapag").val(),
+                },
+                type: "GET",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    
+                    if(data.length == 0)
+                    {
+                        $(".loader-gif").hide();
+                        vAutorizado = true;
+                        var vTextbtn = $("#btnTableEdit").val();
+                        if(vTextbtn == "Editar pagos"){
+
+                            $("#tDetalle > tbody > tr.active > td > input").each(function()
+                            {
+                                $(this).removeAttr('readonly');
+                            })
+                            $("#tDetalle > tbody > tr.active > td > span").each(function()
+                            {
+                                $(this).show();
+                            })
+                            $("#tDetalle > tbody > tr.active > td > input[fechapago]").each(function()
+                            {
+                                $(this).addClass('datetimepicker');
+                            })
+                            $('#sAddRow').show();
+                            $("#btnTableEdit").val("Proteger pagos");
+                            // $('#hdFechasesp').val("1");  
+
+                        }
+                        $("#mEditarpagos").modal("hide");
+                    }else
+                    {
+                        $('#chkFechasesp').prop('checked', false);        
+                        $('#hdFechasesp').val("0");    
+                        bootbox.alert(data);
+                        $(".loader-gif").hide();
+                    }
+                },
+                error: function (error) {
+                    bootbox.alert(error.responseText);
+                }
+            });
+        })
+
+        $("#btnSimuladorOk").click(function()
+        {  
+            //var vImporteapagarInt = parseInt($("#Importeapagar").val());
+            $("#hdPlazosok").val("0");
+
+            var vImporteapagar = parseFloat($("#Importeapagar").val());
+            var vQuitaneg = parseFloat($("#Quita_neg").val());
+            var vNumpagos = parseInt($("#Num_pagos").val());
+            var vFechainicial = $("#Fecha_ini").val();
+            var vPeriodicidad = $("#Periodicidad").val();
+            var vPcantpo = parseFloat($("#Pct_antpo").val());
+            var vCondescuento = parseInt($("#Con_descuento").val());
+            var vMismomes = parseInt($("#Mismo_mes").val());
+
+            if(vImporteapagar <= 0){
+              bootbox.alert("Es necesario indicar el importe total a pagar del convenio");  
+              $("#Importeapagar").focus();
+              return false;
+            }
+
+            if( vCondescuento == 1 && vQuitaneg <= 0){
+              bootbox.alert("Es necesario indicar el % de quita que se aplicará al convenio");  
+              $("#Quita_neg").focus();
+              return false;
+            }
+
+            if(vNumpagos < 1){
+              bootbox.alert("Es necesario indicar el numero de pagos del convenio");  
+              $("#Num_pagos").focus();
+              return false;
+            }
+
+            if($("#Fecha_ini").val().length == 0)
+            {
+                bootbox.alert("Es necesario indicar le fecha del primer pago.");
+                $("#Fecha_ini").focus();
+                return false;
+            }
+
+            if($("#tDetalle > tbody > tr.active").length > 0 )
+            {
+
+                bootbox.confirm({
+                    message: "Ya hay informacion en la tabla de pagos, los registros actuales seran eliminados",
+                    callback: function(result)
+                    {
+                        if(result)
+                        {
+                            $("#tDetalle tbody tr").remove();
+                        }
+                    }
+                }); 
+            }
+
+            // Inicia rutina para generar el convenio sugerido
+
+            setTimeout(function()
+            {
+                var fechapago = parseDDMMYYYY($("#Fecha_ini").val());
+                if( vCondescuento == 1 && vQuitaneg > 0){
+                    if(vPcantpo > 0){
+                        var anticipo = Math.ceil(vImporteapagar*(vPcantpo/100));
+                        var pagoparcial = Math.ceil( (vImporteapagar-anticipo)/(vNumpagos-1) );
+                    }else{                
+                        var pagoparcial = Math.ceil( vImporteapagar/vNumpagos);
+                        var anticipo = Math.ceil( pagoparcial );
+                    }
+                }else{
+                    if(vPcantpo > 0){
+                        var anticipo = vImporteapagar*(vPcantpo/100);
+                        var pagoparcial =  (vImporteapagar-anticipo)/(vNumpagos-1);
+                    }else{                
+                        var pagoparcial =  vImporteapagar/vNumpagos;
+                        var anticipo =  pagoparcial;
+                    }
+                }
+
+                if( vNumpagos == 1)
+                {
+                    if(vCondescuento == 1)
+                    {
+                        anticipo = Math.ceil(vImporteapagar);
+                    }else{
+                        anticipo = vImporteapagar;
+                    }
+                }
+
+                var pagorow = 0;
+                var acumpagorow = 0;
+                var ultimoDia = new Date(fechapago.getFullYear(), fechapago.getMonth() + 1, 0);
+                let uday = ultimoDia.getDate();
+                let umonth = ultimoDia.getMonth() +1;
+                let uyear = ultimoDia.getFullYear();
+
+                for (let i = 0; i <= vNumpagos-1; i++) {
+                    // Obtener la diferencia en milisegundos
+                    var diferenciaEnMilisegundos = fechapago.getTime() - ultimoDia.getTime();
+                    // Convertir a días
+                    var diferenciaEnDias = diferenciaEnMilisegundos / (1000 * 60 * 60 * 24);
+
+                    if(vMismomes ==1 && diferenciaEnDias >= 0)
+                    {
+                        bootbox.alert("Este convenio requiere que todos los pagos queden dentro del mes. Algunas fechas se ajustaron al dia ultimo, revise por favor!");
+                        fechapago = ultimoDia;
+                    }
+
+                    if(vMismomes ==0 && diferenciaEnDias >= 0)
+                    {
+                        $("#hdPlazosok").val("1");
+                    }
+
+                    let day = fechapago.getDate();
+                    let month = fechapago.getMonth() +1;
+                    let year = fechapago.getFullYear();
+
+                    if(month < 10){
+                        fecharow= `${day}/0${month}/${year}`;
+                    }else{
+                        fecharow= `${day}/${month}/${year}`;
+                    }
+
+                    vCount = i;
+                    vPartida = vCount+1;
+
+                    if(vCount == 0 ){
+                        pagorow = anticipo.toFixed(2);
+                    }else{
+                        pagorow = pagoparcial.toFixed(2);
+                    }
+
+                    if(i == vNumpagos-1 && vNumpagos>1)
+                    {
+                        acumpagorow = parseFloat(acumpagorow)+parseFloat(pagorow);
+                        vDife = parseFloat(vImporteapagar)-parseFloat(acumpagorow)
+
+                        if(vDife>0){
+                            pagorow = parseFloat(pagorow)+parseFloat(vDife); 
+                        }else{
+                            pagorow = parseFloat(pagorow)-parseFloat(vDife);
+                        }
+                        pagorow = pagorow.toFixed(2);
+
+                        // bootbox.alert("Diferencia: "+vDife);
+                    }
+
+
+                    var vNewRow = '<tr id="tr' + vCount + '" row="' + vCount + '" class="active" >\
+                                        <td>\
+                                            <input disabled type="text" name="lstDetalle[' + vCount + '][Partida]" value="'+vPartida+'" class="form-control numeric-field input-sm text-right" row="' + vCount + '" max-length="10" placeholder="" id="lstPartida' + vCount + '" />\
+                                        </td>\
+                                        <td>\
+                                            <input readonly fechapago onchange="ValidateDate(this);" type="text" name="lstDetalle[' + vCount + '][Fecha]" value="'+fecharow+'"class="form-control input-sm" row="' + vCount + '" placeholder="Fecha"  onkeypress="ChangeToPago(this);" id="lstFecha' + vCount + '" />\
+                                            <input readonly type="hidden" name="lstDetalle[' + vCount + '][Active]" value="true" id="lstActive' + vCount + '" />\
+                                        </td>\
+                                        <td>\
+                                            <input readonly onchange="AddNewRow(this);" type="text" name="lstDetalle[' + vCount + '][Pago]" value="'+pagorow+'" class="form-control numeric-field input-sm text-right" row="' + vCount + '" max-length="10" placeholder="Pago" id="lstPago' + vCount + '" />\
+                                        </td>\
+                                        <td align="center"><span onclick="EliminarDetalle(this)" row="' + vCount + '" class="glyphicon glyphicon-remove" style="font-size:19px;color:red;margin-top: 9px;display: none;"></span></td>\
+                                    </tr>';
+                    $("#tDetalle > tbody").append(vNewRow);
+
+                    acumpagorow = parseFloat(acumpagorow)+parseFloat(pagorow);
+
+                    if(fechapago != ultimoDia)
+                    {
+                        switch (vPeriodicidad) {
+                            case "S":
+                                fechapago.setDate(fechapago.getDate() + 7);
+                                break;
+                            case "Q":
+                                fechapago.setDate(fechapago.getDate() + 15);
+                                break;
+                            case "M":
+                                fechapago.setMonth(fechapago.getMonth() + 1);
+                                break;
+                        }
+                    }
+                }
+            },200)            
+
+            setTimeout(function()
+            {
+                AsignarFunciones();
+                ContarDetalles();
+                if( vMismomes ==0 && $("#hdPlazosok").val() != "1" )
+                {
+                    bootbox.alert("Este no parece un convenio a plazos ya que todos los pagos quedaron dentro del mes, cambie el tipo de negociacion y vuelva a generar la simulación.");
+                }
+            },400)  
+
+
+            $("#lblQuitaneg").text( '% de quita negociada: '+vQuitaneg ).show();
+            $("#lblImporteconvenio").text( 'Importe total del convenio: '+addCommas(vImporteapagar.toFixed(2))).show();
+            $("#mSimulador").modal("hide");
+            $('#divtotalapagar').show();
+            $('#divtablapagos').show();
+            $('#btnTableEdit').show();
+            $('#Telefono').show().focus();
+
+        })
+
+        $("#Email").change(function()
+        {
+            var regex = /[\w-\.]{2,}@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+
+            if (regex.test($('#Email').val().trim())) {
+                // bootbox.alert('Correo validado');
+                $("#hdCorreovalido").val("1");
+            } else {
+                alert('La dirección de correo no es válida');
+                $("#hdCorreovalido").val("0");
+                $("#Correo").focus();
+            }            
+        })
+
+        // $(\'input[disabled]\') txbUsuariopag
+
+        $("#btnTableEdit").click(function()
+        {    
+            var vTextbtn = $("#btnTableEdit").val();
+
+            if(vTextbtn == "Editar pagos"){
+                $("#txbContrasenapag").val("");
+                $("#mEditarpagos").modal("show");
+                $("#txbUsuariopag").val("").focus();
+            }else{
+                $("#tDetalle > tbody > tr.active > td > input").each(function()
+                {
+                    $(this).attr('readonly', 'readonly');
+                })
+                $("#tDetalle > tbody > tr.active > td > span").each(function()
+                {
+                    $(this).hide();
+                })
+                $("#tDetalle > tbody > tr.active > td > input[fechapago]").each(function()
+                {
+                    $(this).removeClass('datetimepicker');
+                })
+                $('#sAddRow').hide();
+                $("#btnTableEdit").val("Editar pagos");
+            }
+
+        })
+
         $("#btnSave").click(function()
-        {            
+        {    
             $("#frmEdit").submit();
+            
         })
 
         $("#frmEdit").submit(function()
         {
-            $("#hdTriedSave").val("true");
+            // bootbox.alert("SI LLEGO AL SUBMIT");
+
+            // $("#hdTriedSave").val("true");
             var vSubmit = true;
-            var vCapital_sc = $("#Saldo_cap").val().replace(/,/g, "");
-            var vCapital = parseFloat(vCapital_sc);
-
-            var vQuitamax = parseFloat($("#Quita").val());
-
-            var vImpuestos_sc = $("#Impuestos").val().replace(/,/g, "");
-            var vImpuestos = parseFloat(vImpuestos_sc);
-
-            var vPagototal_sc = $("#Totalpago").val().replace(/,/g, "");
-            var vPagototal = parseFloat(vPagototal_sc);
-
-            var vPorpagocap = 100-vQuitamax;
-            var vPagocap = vCapital*(vPorpagocap/100);
-            var vPagominimo = vPagocap + vImpuestos;
-            vPagominimo = vPagominimo.toFixed(2);
-
-            // bootbox.alert("Resta: "+ (vPagominimo-vPagototal) ) ;
-            // vSubmit = false;
-
+            var vSoloparcial = $("#Soloparcial").val();
+            var vPagototal = parseFloat($("#nTotalpago").val());
+            var vTotalconvenio = parseFloat($("#Importeapagar").val());
+            var vMismomes = parseInt($("#Mismo_mes").val());
 
             $(".required-field").each(function()
             {
@@ -802,21 +2004,22 @@
                 bootbox.alert("Hay informacion incompleta en la tabla de pagos o en el formulario, revise por favor");
             }
 
-            if($("#Cuenta_pan").val().trim().length < 16)
+            if(vPagototal != vTotalconvenio && vSoloparcial !=1)
             {
-                bootbox.alert("El dato del PAN debe contener 16 numeros.");
-                vSubmit = false;
-            }
-
-            if(vPagominimo > vPagototal)
-            {
-                bootbox.alert("El pago con quita maxima no debe ser inferior a: "+vPagominimo);
+                bootbox.alert("La suma de los pagos debe ser igual al importe total del convenio.");
+                //bootbox.alert("vPagototal="+vPagototal+" --- vTotalconvenio="+vTotalconvenio);
                 vSubmit = false;
             }
 
             if($("#tDetalle > tbody > tr.active").length == 0 && vSubmit)
             {
                 bootbox.alert("Tiene que agregar al menos un pago para guardar.");
+                vSubmit = false;
+            }
+
+            if( vMismomes ==0 && $("#hdPlazosok").val() != "1" )
+            {
+                bootbox.alert("Este no parece un convenio a plazos ya que todos los pagos quedaron dentro del mes, cambie el tipo de negociacion y vuelva a generar la simulación.");
                 vSubmit = false;
             }
 

@@ -23,10 +23,22 @@ ALTER TABLE `convenios`.`tipos_negociacion`
   ADD COLUMN `Solo_parcial` bit(1) NOT NULL DEFAULT b'0' AFTER `Pct_antpo`;
 
 ALTER TABLE `convenios`.`tipos_negociacion`
-  ADD COLUMN `Idcartaconv` int(11) NOT NULL DEFAULT 0 AFTER `Solo_parcial`;
-
-ALTER TABLE `convenios`.`tipos_negociacion`
   ADD COLUMN `Con_descuento` bit(1) NOT NULL DEFAULT b'0' AFTER `Idcartaconv`;
 
 ALTER TABLE `convenios`.`tipos_negociacion`
   ADD COLUMN `Con_excepcion` bit(1) NOT NULL DEFAULT b'0' AFTER `Con_descuento`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Idcarta_tdc` int(11) NOT NULL DEFAULT b'0' AFTER `Con_excepcion`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Idcarta_krn` int(11) NOT NULL DEFAULT b'0' AFTER `Idcarta_tdc`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Idcarta_con` int(11) NOT NULL DEFAULT b'0' AFTER `Idcarta_krn`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Idcarta_hip` int(11) NOT NULL DEFAULT b'0' AFTER `Idcarta_con`;
+
+ALTER TABLE `convenios`.`tipos_negociacion`
+  ADD COLUMN `Clavecrm` varchar(5) NOT NULL DEFAULT '' AFTER `Idcarta_hip`;

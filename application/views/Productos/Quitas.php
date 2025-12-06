@@ -83,7 +83,7 @@
             </table>
 
             <div class="col-md-2 col-sm-2 col-xs-12 ">
-                <label class="control-label" for="Nombre">Fecha vigencia::</label>
+                <label class="control-label" for="Nombre">Fecha vencimiento:</label>
                 <input type="text" name="Vigencia" id="Vigencia" value="<?= $Fecha_vig ?>"  class="form-control datetimepicker" max-length="10">
             </div>
 

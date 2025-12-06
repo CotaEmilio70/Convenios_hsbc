@@ -129,6 +129,7 @@
     <div class="row margin-top" style="margin-top:20px;">
         <!-- <input type="hidden" id="Plataforma" name="Plataforma" value="" class="form-control"> -->
         <input type="hidden" id="Plasticopago" name="Plasticopago" value="" class="form-control">
+        <input type="hidden" id="Billing" name="Billing" value="" class="form-control">
         <input type="hidden" id="Dmssnum" name="Dmssnum" value="" class="form-control">
         <input type="hidden" id="Modalidad" name="Modalidad" value="" class="form-control">
         <input type="hidden" id="Macro_gen" name="Macro_gen" value="" class="form-control">
@@ -149,6 +150,11 @@
         <input type="hidden" id="Plazo_maximo" name="Plazo_maximo" value="" class="form-control">
         <input type="hidden" id="Con_descuento" name="Con_descuento" value="" class="form-control">
         <input type="hidden" id="Con_excepcion" name="Con_excepcion" value="" class="form-control">
+        <input type="hidden" id="hdAutoexcepcion" name="hdAutoexcepcion" value="" class="form-control">
+        <input type="hidden" id="Total_adeudo" name="Total_adeudo" value="" class="form-control">
+        <input type="hidden" id="Saldo_contable" name="Saldo_contable" value="" class="form-control">
+        <input type="hidden" id="hdPlazosok" name="hdPlazosok" value="0" class="form-control">
+        <input type="hidden" id="Grupoconv" name="Grupoconv" value="" class="form-control">
 
         <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
             <label class="control-label" for="Nombre">Fecha negociacion:</label>
@@ -196,6 +202,40 @@
     </div>
 
     <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12">
+            <label class="control-label" for="Llamada">Llamada:</label>
+            <select class="form-control" name="Llamada" id="Llamada">
+                    <option value="LLE">LLAMADA DE ENTRADA</option>
+                    <option value="LLS">LLAMADA SALIDA</option>
+                    <option value="LLW">LLAMADA DE ENTRADA WHATSAPP</option>
+                </select>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+        </div>
+
+        <div class="col-md-4 col-sm-4 col-xs-12">
+            <label class="control-label" for="txbClavenego">Causa de no pago:</label>
+             <div class="row">
+                <div class="col-md-4 col-sm-4 col-xs-4">
+                    <input type="hidden" id="txbCausanopago" max-length="4" value="<?= set_value("Causanopago") ?>" class="form-control">
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <?php
+                        $Options = array(
+                            "" => "Seleccionar opción"
+                        );
+                        foreach($Causasnopago as $Causanp)
+                        {
+                            $Options[$Causanp->Clave] = $Causanp->Nombre;
+                        }
+                    ?>
+                    <?= form_dropdown(array('name' => 'Causanopago','id' => 'Causanopago', 'class' => 'form-control required-field'),$Options, set_value("Causanopago")) ?>
+                </div>
+            </div>
+            <label class="control-label" style="display:none;">Este campo es obligatorio</label>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-2 col-sm-2 col-xs-12">
             <label class="control-label" for="Telefono">Telefono:</label>
             <input type="text" name="Telefono" id="Telefono" value="<?= set_value("Telefono") ?>" placeholder="Tel." class="form-control input-sm required-field" max-length="10">
@@ -215,6 +255,11 @@
             <input type="text" name="Email" id="Email" value="<?= set_value("Email") ?>" placeholder="Email" class="form-control input-sm required-field" max-length="100">
             <input type="hidden" name="hdCorreovalido" id="hdCorreovalido" value="0">
         </div>
+
+        <!-- <div class="col-md-2 col-sm-3 col-xs-6" style="margin-top:25px;">
+            <input class="btn btn-danger" id="btnExcepcion" style="float: right;width:100%; display:none;" type="button" value="Auto excepcion">
+        </div> -->
+
     </div>
 
     <div class="row">
@@ -238,7 +283,6 @@
         <div class="col-md-offset-8 col-sm-offset-6 col-md-2 col-sm-3 col-xs-6">
             <input class="btn btn-success" id="btnSave" style="float: right;width:100%;'" type="button" value="Guardar">
         </div>
-
     </div>
 
 <!-- Ventana modal para edicion de datos-->
@@ -286,8 +330,17 @@
         <div class="modal-content">
             <div class="modal-header" style="background-color: #4d4dff;">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" style="color: #FFF;">Autorizacion</h4>
+                <h4 class="modal-title" style="color: #FFF;">Autorizacion para editar pagos</h4>
                 </div>
+                    <div class="row" style="margin-left:10px;margin-bottom:10px;">
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-check">
+                            <input class="form-check-input" type="checkbox" value="" name="chkFechasesp" id="chkFechasesp">
+                            <input type="hidden" id="hdFechasesp" name="hdFechasesp" value="0">
+                            <label class="form-check-label" for="chkFechasesp">
+                                Permitir fechas especiales
+                            </label>
+                        </div>
+                    </div>
                     <div class="row" style="margin-left:10px;margin-bottom:10px;">
                         <div class="col-md-4 col-sm-4 col-xs-12">
                             <label class="label-control" for="txbUsuariopag">Usuario:</label>
@@ -301,6 +354,35 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresarpag">Regresar</button>
                         <button type="button" class="btn btn-primary" id="btnAutorizarEdtPagos">Autorizar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana modal para autorizar excepciones-->
+
+<div class="modal fade" id="mAutoexcep" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ff0000;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" style="color: #FFF;">Autorizar excepcion</h4>
+                </div>
+                    <div class="row" style="margin-left:10px;margin-bottom:10px;">
+                        <div class="col-md-4 col-sm-4 col-xs-12">
+                            <label class="label-control" for="txbUsuarioexc">Usuario:</label>
+                            <input type="text" id="txbUsuarioexc" class="form-control" placeholder="Usuario" max-length="10">
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <label class="label-control" for="txbContrasenaexc">Contraseña:</label>
+                            <input type="password" id="txbContrasenaexc" class="form-control" placeholder="Contraseña">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="btnRegresarexc">Regresar</button>
+                        <button type="button" class="btn btn-primary" id="btnAutorizarAutoexcep">Autorizar</button>
                     </div>
                 </div>
             </div>
@@ -369,7 +451,7 @@
                 <div class="col-md-3 col-sm-3 col-xs-12">
                     <label class="control-label" for="Periodicidad">Periodicidad:</label>
                     <select class="form-control" name="Periodicidad" id="Periodicidad">
-                            <option value="U" selected>Pago único</option>
+                            <option value="U" style="display:none;" >Pago único</option>
                             <option value="S">Semanal</option>
                             <option value="Q">Quincenal</option>
                             <option value="M">Mensual</option>
@@ -551,6 +633,8 @@
         // bootbox.alert("Si entro al validate.");
 
         var vFechaneg = $("#Fecha_neg").val();
+        var vMismomes = $("#Mismo_mes").val();
+        var vFechasesp = $("#hdFechasesp").val();
         var vFechapago = $(vElement).val();
         var vRow = $(vElement).attr("row");
         var vPartida =  $("#lstPartida" + vRow).val();
@@ -566,7 +650,9 @@
                 Fechaneg: vFechaneg,
                 Fechapago: vFechapago,
                 Partida: vPartida,
-                Totpart: vTotpart
+                Totpart: vTotpart,
+                Mismomes: vMismomes,
+                Fechasesp: vFechasesp
             },
             type: "GET",
             contentType: 'text/json',
@@ -657,6 +743,7 @@
     function ContarDetalles()
     {
 
+        var vSaldotot = parseFloat($("#Nsaldototal").val());
         var vSoloparcial = $("#Soloparcial").val();
         var vTotalRegistros = 0;
         var vTotalPago = 0;
@@ -671,8 +758,13 @@
                 $("#lstPartida" + vRow).val(vPartida);
                 vTotalRegistros++;
                 var vCantidad = parseFloat($("#lstPago" + vRow).val());
-                vTotalPago += parseFloat(vCantidad);
-                vPartida++;
+                if (Number.isNaN(vCantidad)) {
+                    bootbox.alert("Existen caracteres inválidos en el importe de la partida "+vPartida+". Asegúrese que solo tenga numeros, sin comas, simbolo de pesos ni otro caracter adicional.");
+                    $("#lstPago" + vRow).val(0);
+                }else{
+                    vTotalPago += parseFloat(vCantidad);
+                    vPartida++;
+                }
             }
         })
         
@@ -688,7 +780,25 @@
             //$("#lblImporteInsuficiente").show();
             //bootbox.alert("Aqui validamos la suma contra el importe a pagar");
         }
-        
+
+        if(vSoloparcial == 1 && vTotalPago >= (vSaldotot)){
+
+            bootbox.alert("El importe del pago puede liquidar el saldo actual, la negociacion cambiará a LIQUIDACION SIN DESCUENTO. Haga click en el boton SIMULADOR para completar el proceso.");
+            $("#Clavenego").val(6).change();
+
+            // bootbox.confirm({
+            //     message: "El importe del pago podría liquidar el saldo, desea cambiar la negociacion a LIQUIDACION SIN DESCUENTO?",
+            //     callback: function(result)
+            //     {
+            //         if(result)
+            //         {
+            //             $("#Clavenego").val(6).change();
+            //         }
+            //     }
+            // }); 
+
+        }
+
     }
 
     function EliminarDetalle(vElement)
@@ -751,15 +861,28 @@
     $(function()
     {
 
+        $("#chkFechasesp").change(function()
+        {
+            if( $(this).is(":checked") ){
+                $("#hdFechasesp").val("1");
+            }else{
+                $('#hdFechasesp').val("0");
+            }
+        })
+
         $("#chkExcepcion").change(function()
         {
-           
             if( $(this).is(":checked") ){
-                 bootbox.alert( "Toda excepción requiere una autorizacion especial antes de guardar el convenio.");
-                 $('#hdExcepcion').val("1");
+                // bootbox.alert( "Toda excepción requiere una autorizacion especial antes de guardar el convenio.");
+                $("#txbUsuarioexc").val(""),
+                $("#txbContrasenaexc").val(""),
+                $("#mSimulador").modal("hide");
+                $("#mAutoexcep").modal("show");
             }else{
                 $('#hdExcepcion').val("0");
             }
+            $("#Quita_neg").val(0);
+            $("#Importeapagar").val(0);
         })
 
         $("#txbClavenego").keypress(function(event)
@@ -778,6 +901,8 @@
         $("#Fecha_ini").change(function()
         {
             var vFechaneg = $("#Fecha_neg").val();
+            var vMismomes = $("#Mismo_mes").val();
+            var vFechasesp = $("#hdFechasesp").val();
             var vFechapago = $(this).val();
 
             $("p.loader-gif").text("Verificando...");
@@ -790,7 +915,9 @@
                     Fechaneg: vFechaneg,
                     Fechapago: vFechapago,
                     Partida: 0,
-                    Totpart: 1
+                    Totpart: 1,
+                    Mismomes: vMismomes,
+                    Fechasesp: vFechasesp
                 },
                 type: "GET",
                 contentType: 'text/json',
@@ -804,7 +931,8 @@
                             callback: function () {
                                 setTimeout(function()
                                 {
-                                    $(this).val("").focus().select();
+                                    // $(this).val("").focus().select();
+                                    $("#Fecha_ini").val("").focus();
                                 },100)
                             }
                         })  
@@ -826,7 +954,8 @@
             $("#txbClavenego").val($(this).val());
             var vIdnego = $(this).val();
             var vPdtoweb = $("#Productoweb").val();
-            var vPrefijocuenta = $("#Cuenta").val();
+            var vCuenta = $("#Cuenta").val();
+            var vMoneda = $("#Moneda").val();
 // 
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
@@ -836,6 +965,8 @@
                 data: {
                     Idnego: vIdnego,
                     Numpdto: vPdtoweb,
+                    Cuenta: vCuenta,
+                    Moneda: vMoneda
                 },
                 type: "GET",
                 contentType: 'text/json',
@@ -862,13 +993,13 @@
 
                         $(".loader-gif").hide();
                         $("#lblTiponegociacion").text( data.nombre_nego );
+                        $("#Grupoconv").val( data.clavecrm );
 
                         $("#Soloparcial").val(data.solo_parcial);
                         $("#Plazo_maximo").val(data.plazo_maximo);
                         $("#Mismo_mes").val(data.mismo_mes);
                         $("#Pct_antpo").val(data.pct_antpo);
                         $("#Tipo_convid").val(data.tipo_convid);
-                        // $("#Tipo_convid_alt").val(data.tipo_convid_alt);
                         $("#Con_descuento").val(data.con_descuento);
                         $("#Con_excepcion").val(data.con_excepcion);
 
@@ -896,8 +1027,8 @@
 
                         if(data.plazo_maximo > 1)
                         {
-                            $('#Num_pagos').val(1).removeAttr('readonly');
-                            $('#Periodicidad').val('U').removeAttr('readonly');
+                            $('#Num_pagos').val(2).removeAttr('readonly');
+                            $('#Periodicidad').val('S').removeAttr('readonly');
                         }else{
                             $('#Num_pagos').val(1).attr('readonly', 'readonly');
                             $('#Periodicidad').val('U').attr('readonly', 'readonly');
@@ -940,12 +1071,18 @@
         $("#Num_pagos").change(function()
         {
             var vPlazomaximo = parseInt($("#Plazo_maximo").val()); 
-
             var vNumpag = parseInt($(this).val());
+
+            if (vPlazomaximo > 1 && vNumpag == 1 )
+            {
+                bootbox.alert("Esta negociacion requiere un mínimo de 2 pagos y un máximo de "+vPlazomaximo);
+                $("#Num_pagos").val(2).focus();
+            }
+
             if (vNumpag > vPlazomaximo )
             {
                 bootbox.alert("El numero máximo de pagos para esta negociacion es de: "+vPlazomaximo);
-                $("#Num_pagos").val(0).focus();
+                $("#Num_pagos").val(vPlazomaximo).focus();
             }
 
         })  
@@ -970,6 +1107,7 @@
                 if ( $('input[id="radioContable"]').is(':checked') )
                 {
                     var vQuitacalc =  (($("#Nsaldocontab").val() - vApagar )/$("#Nsaldocontab").val())*100  ;
+
                     $("#Saldo_usado").val('C');
                     if(vQuitacalc > vQuita_sc)
                     {
@@ -978,6 +1116,7 @@
                         var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita_sc/100))  ;
                         vPagocalc =  Math.ceil(vPagocalc)+1;
                     }
+
                 }else{
                     var vQuitacalc = (($("#Nsaldototal").val() - vApagar )/$("#Nsaldototal").val()) *100 ;
                     $("#Saldo_usado").val('T');
@@ -1003,8 +1142,20 @@
                     }
 
                 }else{
-                    bootbox.alert("El importe excede el maximo de quita autorizada.");
-                    $("#Quita_neg").val(0);
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuitacalc.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuitacalc+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                            $("#Quita_neg").val(0);
+                        }else{
+                            $("#Quita_neg").val(vQuitacalc.toFixed(2));
+                        }
+                        
+                    }else{
+                        bootbox.alert("El importe excede el maximo de quita autorizada.");
+                        $("#Quita_neg").val(0);
+                    }
                 }
 
             }else{
@@ -1019,6 +1170,7 @@
             var vQuita_st = parseFloat($("#Quita_st").val());
             var vQuita_sc = parseFloat($("#Quita_sc").val());
             var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vExcepcion = parseInt( $("#hdExcepcion").val() );
             var vEnfacultad = true;
 
             if (vQuita > 0 && vCondescuento == 1)
@@ -1048,9 +1200,25 @@
                 {
                     $("#Importeapagar").val(vPagocalc.toFixed(2));
                 }else{
-                    bootbox.alert("El % indicado excede el maximo de quita autorizada.");
-                    $("#Importeapagar").val(0);
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuita.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuita+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                           $("#Importeapagar").val(0);
+                        }else{
+                            $("#Importeapagar").val(vPagocalc.toFixed(2));
+                        }
+                    }else{
+                        bootbox.alert("El % indicado excede el maximo de quita autorizada.");
+                       $("#Importeapagar").val(0);
+                    }
                 }
+
+                // }else{
+                //     bootbox.alert("El % indicado excede el maximo de quita autorizada.");
+                //     $("#Importeapagar").val(0);
+                // }
 
             }else{
                 $("#Importeapagar").val(0);
@@ -1109,11 +1277,6 @@
         {
             var vCuenta = $(this).val();
 
-            // if( $("#txbClavenego").val() < 4 && vCuenta.length < 19)   
-            // {
-            //     $(this).val('000'+vCuenta);
-            // }
-
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
             $.ajax({
@@ -1153,6 +1316,7 @@
 
                         $("#Nombre").val(data.first);
                         $("#Plasticopago").val(data.plasticopago);
+                        $("#Billing").val(data.billing);
                         $("#Fec_ape").val(data.fec_ape);
                         $("#Mes_castigo").val(data.mes_castigo);
                         $("#Plataforma").val(data.plataforma);
@@ -1161,6 +1325,7 @@
                         $("#Saldo_curbal").val( addCommas(data.saldo_curbal));
                         $("#Nsaldototal").val( data.saldo_total );
                         $("#Nsaldocontab").val( data.saldo_curbal );
+
                         $("#Quita_st").val( data.quita_st );
                         $("#Quita_sc").val( data.quita_sc );
 
@@ -1172,6 +1337,13 @@
                         $("#Int_ordinarios").val( addCommas(data.int_ordinarios));
                         $("#Int_moratorios").val( addCommas(data.int_moratorios));
                         $("#Conc_exigibles").val( addCommas(data.conc_exigibles));
+                        $("#Int_moratorios").val( addCommas(data.int_moratorios));
+                        $("#Total_adeudo").val( addCommas(data.total_adeudo));
+
+                        //bootbox.alert("Valor: "+data.total_adeudo);
+
+                        $("#Saldo_contable").val( addCommas(data.saldo_contable));
+
                         $("#Saldo_vencido_krn").val( addCommas(data.saldo_vencido_krn));
 
                         $("#Dmssnum").val(data.dmssnum);
@@ -1187,17 +1359,21 @@
                         $("#Etapa").val( data.etapa);
                         $("#Restitucion").val( data.restitucion);
 
-                        // if(data.cuenta_pan =='' || data.cuenta_pan == null)
-                        // {
-                        //     bootbox.alert("Hace falta el dato del PAN, debera ingresarlo manualmente para poder guardar el convenio!.");
-                        // }
-
                         $("#textoContable").text( "Contable: "+$("#Saldo_curbal").val() );
                         $("#textoTotal").text( "Total: "+$("#Saldo_act").val() );
 
-                        $("#Status").html('<h4 id="Status">'+data.status+'</h4>');
-                        $(".loader-gif").hide();
+                        // $("#Status").html('<h4 id="Status">'+data.status+'</h4>');
 
+                        if(data.quita_st == 0 || data.quita_sc == 0){
+                            bootbox.alert("Es posible que las quitas autorizadas ya hayan expirado. Avise al supervisor.");
+                            $("#Quita_sc").parent().addClass("has-error");
+                            $("#Quita_st").parent().addClass("has-error");
+                        }else{
+                            $("#Quita_sc").parent().removeClass("has-error");
+                            $("#Quita_st").parent().removeClass("has-error");
+                        }
+
+                        $(".loader-gif").hide();
                         $('#Plataforma').trigger('change');
                     }
                 },
@@ -1324,6 +1500,13 @@
             $("#btnTableEdit").focus();
         })
 
+        $("#btnRegresarexc").click(function()
+        {
+            $('#chkExcepcion').prop('checked', false);        
+            $('#hdExcepcion').val("0");    
+            $("#mSimulador").modal("show");
+        })
+
         $("#txbUsuario").keypress(function()
         {
             if(event.charCode == 13)
@@ -1356,6 +1539,58 @@
             }
         })
 
+        $("#txbUsuarioexc").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#txbContrasenaexc").focus();
+            }
+        })
+
+        $("#txbContrasenaexc").keypress(function()
+        {
+            if(event.charCode == 13)
+            {
+                $("#btnAutorizarAutoexcep").trigger("click");
+            }
+        })
+//
+        $("#btnAutorizarAutoexcep").click(function()
+        {
+            $("p.loader-gif").text("Verificando...");
+            $(".loader-gif").show();
+             $.ajax({
+                url: $("#url").val() + '/Users/AutorizacionSuperv/',
+                dataType: "json",
+                data: {
+                    Usuario: $("#txbUsuarioexc").val(),
+                    Contrasena: $("#txbContrasenaexc").val(),
+                },
+                type: "GET",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if(data.length == 0)
+                    {
+                        $(".loader-gif").hide();
+                        // vAutorizado = true;
+                        $("#hdAutoexcepcion").val($("#txbUsuarioexc").val());
+                        $('#hdExcepcion').val("1");
+                        $("#mAutoexcep").modal("hide");
+                        $("#mSimulador").modal("show");
+                    }else
+                    {
+                        $("#hdAutoexcepcion").val("");
+                        $('#hdExcepcion').val("0");
+                        bootbox.alert(data);
+                        $(".loader-gif").hide();
+                    }
+                },
+                error: function (error) {
+                    bootbox.alert(error.responseText);
+                }
+            });
+        })
+//
         $("#btnAutorizarOtros").click(function()
         {
             $("p.loader-gif").text("Verificando...");
@@ -1427,11 +1662,14 @@
                             })
                             $('#sAddRow').show();
                             $("#btnTableEdit").val("Proteger pagos");
+                            // $('#hdFechasesp').val("1");  
 
                         }
                         $("#mEditarpagos").modal("hide");
                     }else
                     {
+                        $('#chkFechasesp').prop('checked', false);        
+                        $('#hdFechasesp').val("0");    
                         bootbox.alert(data);
                         $(".loader-gif").hide();
                     }
@@ -1445,6 +1683,8 @@
         $("#btnSimuladorOk").click(function()
         {  
             //var vImporteapagarInt = parseInt($("#Importeapagar").val());
+            $("#hdPlazosok").val("0");
+
             var vImporteapagar = parseFloat($("#Importeapagar").val());
             var vQuitaneg = parseFloat($("#Quita_neg").val());
             var vNumpagos = parseInt($("#Num_pagos").val());
@@ -1546,6 +1786,11 @@
                         fechapago = ultimoDia;
                     }
 
+                    if(vMismomes ==0 && diferenciaEnDias >= 0)
+                    {
+                        $("#hdPlazosok").val("1");
+                    }
+
                     let day = fechapago.getDate();
                     let month = fechapago.getMonth() +1;
                     let year = fechapago.getFullYear();
@@ -1619,7 +1864,12 @@
             {
                 AsignarFunciones();
                 ContarDetalles();
+                if( vMismomes ==0 && $("#hdPlazosok").val() != "1" )
+                {
+                    bootbox.alert("Este no parece un convenio a plazos ya que todos los pagos quedaron dentro del mes, cambie el tipo de negociacion y vuelva a generar la simulación.");
+                }
             },400)  
+
 
             $("#lblQuitaneg").text( '% de quita negociada: '+vQuitaneg ).show();
             $("#lblImporteconvenio").text( 'Importe total del convenio: '+addCommas(vImporteapagar.toFixed(2))).show();
@@ -1676,20 +1926,19 @@
 
         $("#btnSave").click(function()
         {    
-            // ContarDetalles();    
             $("#frmCreate").submit();
+            
         })
 
         $("#frmCreate").submit(function()
         {
+
             $("#hdTriedSave").val("true");
             var vSubmit = true;
             var vSoloparcial = $("#Soloparcial").val();
             var vPagototal = parseFloat($("#nTotalpago").val());
             var vTotalconvenio = parseFloat($("#Importeapagar").val());
-
-            // var vPagototal = Math.round((vPagototal + Number.EPSILON) * 100) / 100;
-            // var vTotalconvenio = Math.round((vTotalconvenio + Number.EPSILON) * 100) / 100;
+            var vMismomes = parseInt($("#Mismo_mes").val());
 
             $(".required-field").each(function()
             {
@@ -1735,6 +1984,12 @@
             if($("#tDetalle > tbody > tr.active").length == 0 && vSubmit)
             {
                 bootbox.alert("Tiene que agregar al menos un pago para guardar.");
+                vSubmit = false;
+            }
+
+            if( vMismomes ==0 && $("#hdPlazosok").val() != "1" )
+            {
+                bootbox.alert("Este no parece un convenio a plazos ya que todos los pagos quedaron dentro del mes, cambie el tipo de negociacion y vuelva a generar la simulación.");
                 vSubmit = false;
             }
 
