@@ -155,6 +155,7 @@
         <input type="hidden" id="Saldo_contable" name="Saldo_contable" value="" class="form-control">
         <input type="hidden" id="hdPlazosok" name="hdPlazosok" value="0" class="form-control">
         <input type="hidden" id="Grupoconv" name="Grupoconv" value="" class="form-control">
+        <input type="hidden" id="Agente" name="Agente" value="" class="form-control">
 
         <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
             <label class="control-label" for="Nombre">Fecha negociacion:</label>
@@ -956,6 +957,8 @@
             var vPdtoweb = $("#Productoweb").val();
             var vCuenta = $("#Cuenta").val();
             var vMoneda = $("#Moneda").val();
+            var vQuitasc = $("#Quita_sc").val();
+            var vQuitast = $("#Quita_st").val();
 // 
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
@@ -966,7 +969,9 @@
                     Idnego: vIdnego,
                     Numpdto: vPdtoweb,
                     Cuenta: vCuenta,
-                    Moneda: vMoneda
+                    Moneda: vMoneda,
+                    Quitasc: vQuitasc,
+                    Quitast: vQuitast
                 },
                 type: "GET",
                 contentType: 'text/json',
@@ -1320,6 +1325,7 @@
                         $("#Fec_ape").val(data.fec_ape);
                         $("#Mes_castigo").val(data.mes_castigo);
                         $("#Plataforma").val(data.plataforma);
+                        $("#Agente").val(data.agente);
 
                         $("#Saldo_act").val( addCommas(data.saldo_total));
                         $("#Saldo_curbal").val( addCommas(data.saldo_curbal));
@@ -1364,8 +1370,17 @@
 
                         // $("#Status").html('<h4 id="Status">'+data.status+'</h4>');
 
-                        if(data.quita_st == 0 || data.quita_sc == 0){
+                        if((data.quita_st == 0 || data.quita_sc == 0) && data.agente != '035' && data.agente != '326' && data.agente != '339' && data.agente != '727' && data.agente != '729'){
                             bootbox.alert("Es posible que las quitas autorizadas ya hayan expirado. Avise al supervisor.");
+                            $("#Quita_sc").parent().addClass("has-error");
+                            $("#Quita_st").parent().addClass("has-error");
+                        }else{
+                            $("#Quita_sc").parent().removeClass("has-error");
+                            $("#Quita_st").parent().removeClass("has-error");
+                        }
+
+                        if((data.quita_st == 0 || data.quita_sc == 0) && (data.agente == '035' || data.agente == '326' || data.agente == '339' || data.agente == '727' || data.agente == '729')){
+                            bootbox.alert("Cuenta de exempleado, no aplican las quitas.");
                             $("#Quita_sc").parent().addClass("has-error");
                             $("#Quita_st").parent().addClass("has-error");
                         }else{

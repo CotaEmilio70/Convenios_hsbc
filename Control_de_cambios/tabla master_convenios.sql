@@ -64,6 +64,7 @@ CREATE TABLE `master_convenios` (
   `Causanp` varchar(5) NOT NULL,
   `Grupoconv` varchar(5) NOT NULL,
   `Peso` varchar(5) NOT NULL,
+  `Agente` varchar(10) NOT NULL,
   `CreatedBy` char(10) NOT NULL,
   `CreatedDate` datetime NOT NULL,
   `UpdatedBy` char(10) NOT NULL,

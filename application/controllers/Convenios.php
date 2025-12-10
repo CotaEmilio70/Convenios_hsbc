@@ -54,7 +54,7 @@ class Convenios extends CI_Controller {
 
         // $Tiposconv = $this->Tiposconvenios_model->GetList();
         $Tiposnego = $this->Tiposnego_model->GetList();
-        $Causasnopago = $this->causasnopago_model->GetList();
+        $Causasnopago = $this->Causasnopago_model->GetList();
         $Data['fecha_neg']= $TodayDate;
         $Data['title'] = "Crear nuevo convenio";
         $Data['Tiposnego'] = $Tiposnego;
@@ -153,11 +153,13 @@ class Convenios extends CI_Controller {
                     "Resultado" => 'PP',
                     "Peso" => '+A07',
                     "Grupoconv" => $this->input->post("Grupoconv"),
+                    "Agente" => $this->input->post("Agente"),
                     "CreatedBy" => $LoggedUserId,
                     "CreatedDate" => $TodayDate,
                     "UpdatedBy" => $LoggedUserId,
                     "UpdatedDate" => $TodayDate
                 );
+
                 $Convenio_id = $this->Convenios_model->Create($NewConv);
 
                 $TotalMovimientosAgregados = 0;
@@ -183,6 +185,29 @@ class Convenios extends CI_Controller {
                     }
                 }
 
+                //Agregar movimiento a bitacora
+                $BitacoraMovimiento = array(
+                    "Log_modulo" => 1,                  // Convenios
+                    "Log_codigoevento" => 11,           // Create
+                    "Log_usuario" => $LoggedUserId,
+                    "Log_descrip" => "Se creo simulacion de convenio ".$Folio_pre."-".str_pad($Folio_cons, 4, "0", STR_PAD_LEFT)." para la cuenta: ".$this->input->post("Cuenta")."/".$this->input->post("Nombre"),
+                    "Log_fechahora" => $TodayDate,
+                    "Log_idreferencia" => $Convenio_id
+                );
+                $result = $this->Bitacora_model->Create($BitacoraMovimiento);
+
+                // si hubo excepcion se loguea la autorizacion
+                if($this->input->post("hdAutoexcepcion") != null && $this->input->post("hdAutoexcepcion") != ""){
+                    $BitacoraMovimiento = array(
+                        "Log_modulo" => 1,                  // Convenios
+                        "Log_codigoevento" => 18,           // Autorizacion de excepcion durante la creacion
+                        "Log_usuario" => $this->input->post("hdAutoexcepcion"),
+                        "Log_descrip" => "Se autorizo excepcion en el convenio ".$Folio_pre."-".str_pad($Folio_cons, 4, "0", STR_PAD_LEFT).". Autorizado por: ".$this->input->post("hdAutoexcepcion"),
+                        "Log_fechahora" => $TodayDate,
+                        "Log_idreferencia" => $Convenio_id
+                    );
+                    $result = $this->Bitacora_model->Create($BitacoraMovimiento);
+                }                
 
                 if($Convenio_id){
                     $this->session->set_flashdata('message_index', 'Se guardo exitosamente el convenio');
@@ -241,10 +266,18 @@ class Convenios extends CI_Controller {
         $Tblpagos = $this->Convdeta_model->GetDetailsById($Id);
         $Totalpago = $this->Convdeta_model->GetTotalPagoById($Id);
         $Tiposnego = $this->Tiposnego_model->GetList();
-        $Causasnopago = $this->causasnopago_model->GetList();
+        $Causasnopago = $this->Causasnopago_model->GetList();
         $Datostiponego = $this->Tiposnego_model->GetByClave($Convenio->Tipo_negoid);
 
-        $lblQuitaneg = "% de quita negociada: ".number_format($Convenio->Quita_neg,2);
+        //color:#FF0000
+
+        if($Convenio->Excepcion ){
+            $lblQuitaneg = "% de quita negociada: ".number_format($Convenio->Quita_neg,2)." (EXCEPCION)";
+            $styQuitaneg = "color:red;";
+        }else{
+            $lblQuitaneg = "% de quita negociada: ".number_format($Convenio->Quita_neg,2);
+            $styQuitaneg = "";
+        }
         $lblImporte = "Importe total del convenio: ".number_format($Convenio->Total_pago,2);
 
         $Textosaldocontable = "Contable: ".number_format($Convenio->Dmcurbal,2);
@@ -264,6 +297,7 @@ class Convenios extends CI_Controller {
         $Data['Tblpagos'] = $Tblpagos;
         $Data['Totalpago'] = $Totalpago;
         $Data['lblQuitaneg'] =  $lblQuitaneg;
+        $Data['styQuitaneg'] =  $styQuitaneg;
         $Data['lblImporte'] = $lblImporte;
         $Data['Fecha_neg'] = $Fecha_neg;
         $Data['Textosaldocontable'] = $Textosaldocontable;
@@ -303,9 +337,7 @@ class Convenios extends CI_Controller {
                     "Tipo_tel" => $this->input->post("Tipo_tel"),
                     "Email" => $this->input->post("Email"),
                     "Cancelado" => 0,
-                    "Excepcion" => $this->input->post("hdExcepcion"),
                     "Fechas_esp" => $this->input->post("hdFechasesp"),
-                    "Auto_excep" => $this->input->post("hdAutoexcepcion"),
                     "Tipo_negoid" => $this->input->post("Clavenego"),
                     "Tipo_convid" => $this->input->post("Tipo_convid"),
                     "Tipo_convid_alt" => $this->input->post("Tipo_convid_alt"),
@@ -346,6 +378,53 @@ class Convenios extends CI_Controller {
                     }
                 }
             }
+
+            //Agregar movimiento a bitacora
+            $BitacoraMovimiento = array(
+                "Log_modulo" => 1,                  // Convenios
+                "Log_codigoevento" => 12,           // Edit
+                "Log_usuario" => $LoggedUserId,
+                "Log_descrip" => "Se modifico simulacion de convenio ".$ConvenioOriginal->Folio_pre."-".str_pad($ConvenioOriginal->Folio_cons, 4, "0", STR_PAD_LEFT)." para la cuenta: ".$this->input->post("Cuenta")."/".$this->input->post("Nombre"),
+                "Log_fechahora" => $TodayDate,
+                "Log_idreferencia" => $this->input->post("Idconvenio")
+            );
+            $result = $this->Bitacora_model->Create($BitacoraMovimiento);
+
+            // si hubo excepcion se loguea la autorizacion de la excepcion
+            if($this->input->post("hdExcepcion") == 1 || $this->input->post("hdExcepcion") =="1"){
+
+                // Se actualiza la excepcion en el master
+                $Conv_modif = array(
+                        "Id" => $this->input->post("Idconvenio"),
+                        "Excepcion" => $this->input->post("hdExcepcion"),
+                        "Auto_excep" => $this->input->post("hdAutoexcepcion")
+                );          
+                $result = $this->Convenios_model->Update($Conv_modif);
+                //
+
+                $BitacoraMovimiento = array(
+                    "Log_modulo" => 1,                  // Convenios
+                    "Log_codigoevento" => 19,           // Autorizacion de excepcion durante la edicion o autorizacion
+                    "Log_usuario" => $this->input->post("hdAutoexcepcion"),
+                    "Log_descrip" => "Se autorizo excepcion en el convenio ".$ConvenioOriginal->Folio_pre."-".str_pad($ConvenioOriginal->Folio_cons, 4, "0", STR_PAD_LEFT).". Autorizado por: ".$this->input->post("hdAutoexcepcion")." durante el proceso de autorizacion.",
+                    "Log_fechahora" => $TodayDate,
+                    "Log_idreferencia" => $this->input->post("Idconvenio")
+                );
+                $result = $this->Bitacora_model->Create($BitacoraMovimiento);
+            }                
+
+            // si el convenio fue autorizado se loguea
+            if($this->input->post("hdAutorizado") == 1 || $this->input->post("hdAutorizado") =="1"){
+                $BitacoraMovimiento = array(
+                    "Log_modulo" => 1,                  // Convenios
+                    "Log_codigoevento" => 13,           // Autorizacion del convenio
+                    "Log_usuario" => $this->input->post("hdAutoexcepcion"),
+                    "Log_descrip" => "Se autorizo el convenio ".$ConvenioOriginal->Folio_pre."-".str_pad($ConvenioOriginal->Folio_cons, 4, "0", STR_PAD_LEFT).". Autorizado por: ".$LoggedUserId,
+                    "Log_fechahora" => $TodayDate,
+                    "Log_idreferencia" => $this->input->post("Idconvenio")
+                );
+                $result = $this->Bitacora_model->Create($BitacoraMovimiento);
+            }                
 
             if($result){
                 $this->session->set_flashdata('message_index', 'Se modifico exitosamente el convenio');
@@ -515,6 +594,8 @@ class Convenios extends CI_Controller {
         $Numpdto = $this->input->get("Numpdto");
         $Cuenta = $this->input->get("Cuenta");
         $Moneda = $this->input->get("Moneda");
+        $Quitasc = $this->input->get("Quitasc");
+        $Quitast = $this->input->get("Quitast");
         $Prefijo = "";
         $Tipodeproducto = "";
 
@@ -541,30 +622,34 @@ class Convenios extends CI_Controller {
         $result_con = $this->Tiposnego_model->GetByClave($Idnego);
 
         if($result_con){
-            $ObjectResponse['clavecrm'] = $result_con->Clavecrm;
-            $ObjectResponse['solo_parcial'] = $result_con->Solo_parcial;
-            $ObjectResponse['plazo_maximo'] = $result_con->Plazo_maximo;
-            $ObjectResponse['mismo_mes'] = $result_con->Mismo_mes;
-            $ObjectResponse['pct_antpo'] = $result_con->Pct_antpo;
-            $ObjectResponse['nombre_nego'] = $result_con->Nombre;
-            $ObjectResponse['con_descuento'] = $result_con->Con_descuento;
-            $ObjectResponse['con_excepcion'] = $result_con->Con_excepcion;
+            if($Quitasc == 0 && $Quitast == 0 && $result_con->Con_descuento == 1){
+                $ObjectResponse['errormsg'] ='La cuenta no califica para ninguna negociacion con descuento.';
+            }else{
+                $ObjectResponse['clavecrm'] = $result_con->Clavecrm;
+                $ObjectResponse['solo_parcial'] = $result_con->Solo_parcial;
+                $ObjectResponse['plazo_maximo'] = $result_con->Plazo_maximo;
+                $ObjectResponse['mismo_mes'] = $result_con->Mismo_mes;
+                $ObjectResponse['pct_antpo'] = $result_con->Pct_antpo;
+                $ObjectResponse['nombre_nego'] = $result_con->Nombre;
+                $ObjectResponse['con_descuento'] = $result_con->Con_descuento;
+                $ObjectResponse['con_excepcion'] = $result_con->Con_excepcion;
 
-            switch ($Tipodeproducto) {
-                case "TDC":
-                    $ObjectResponse['tipo_convid'] = $result_con->Idcarta_tdc;
-                    break;
-                case "KRN":
-                    $ObjectResponse['tipo_convid'] = $result_con->Idcarta_krn;
-                    break;
-                case "CON":
-                    $ObjectResponse['tipo_convid'] = $result_con->Idcarta_con;
-                    break;
-                case "HIP":
-                    $ObjectResponse['tipo_convid'] = $result_con->Idcarta_hip;
-                    break;
-                default:
-                    $ObjectResponse['tipo_convid'] = 0;
+                switch ($Tipodeproducto) {
+                    case "TDC":
+                        $ObjectResponse['tipo_convid'] = $result_con->Idcarta_tdc;
+                        break;
+                    case "KRN":
+                        $ObjectResponse['tipo_convid'] = $result_con->Idcarta_krn;
+                        break;
+                    case "CON":
+                        $ObjectResponse['tipo_convid'] = $result_con->Idcarta_con;
+                        break;
+                    case "HIP":
+                        $ObjectResponse['tipo_convid'] = $result_con->Idcarta_hip;
+                        break;
+                    default:
+                        $ObjectResponse['tipo_convid'] = 0;
+                }
             }
         }else{
             $ObjectResponse['errormsg'] ='Hubo error al consultar el tipo de negociacion, avise al administrador.'; 
@@ -652,6 +737,7 @@ class Convenios extends CI_Controller {
                             $ObjectResponse['etapa'] = $resultkrn->etapa;
                             $ObjectResponse['restitucion'] = $resultkrn->restitucion;
                             $ObjectResponse['billing'] = $Cuenta;
+                            $ObjectResponse['agente'] = '';
 
                             $ObjectResponse['status'] = ($resultkrn->activo == 0) ? "INACTIVO" : "ACTIVO";
                             
@@ -715,6 +801,7 @@ class Convenios extends CI_Controller {
                             $ObjectResponse['etapa'] = $resulttdc->etapa;
                             $ObjectResponse['restitucion'] = $resulttdc->restitucion;
                             $ObjectResponse['billing'] = $resulttdc->biling;
+                            $ObjectResponse['agente'] = $resulttdc->agente;
 
                             $ObjectResponse['status'] = ($resulttdc->activo == 0) ? "INACTIVO" : "ACTIVO";
                         }
@@ -747,6 +834,12 @@ class Convenios extends CI_Controller {
                     }
                 }
 
+                // Excepcion: en caso de TDC donde el campo agente trae estos valores no aplica quita por ser exempleados:
+                // 035,326,339,727,729
+                if( $ObjectResponse['productoweb'] == 40 && ($ObjectResponse['agente'] == '035' ||$ObjectResponse['agente'] == '326' ||$ObjectResponse['agente'] == '339' || $ObjectResponse['agente'] == '727' || $ObjectResponse['agente'] == '729')){
+                    $ObjectResponse['quita_st'] = 0;
+                    $ObjectResponse['quita_sc'] = 0;
+                }
 
                 if($ObjectResponse['status'] == 'ACTIVO'){
 
