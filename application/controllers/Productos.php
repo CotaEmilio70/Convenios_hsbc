@@ -292,6 +292,91 @@ class Productos extends CI_Controller {
         }
     }
 
+    //
+function QuitasPlazos($Id = 0){
+        if(!VerificarPermisos($this->session->UID, "Productos", "Edit")){
+            $this->session->set_flashdata('logged-message', 'No tiene permisos para entrar a esta opcion. Contacte al administrador.');
+            redirect("");
+        }
+        $Producto = $this->Productos_model->GetById($Id);
+
+        if(!$Producto)
+        {
+            $Data['heading'] = "Page Not Found";
+            $Data['message'] = "The page you requested was not found.";
+            $this->load->view('errors/html/error_general', $Data);
+            return;
+        }
+
+        $Quitas = $this->Quitas_plazos_model->GetByProducto($Id);
+
+        $Fecha_vig = unix_to_human(time(), TRUE, 'mx');
+
+        $Data["Quitas"] = $Quitas;
+        $Data['title'] = "Definir quitas a plazos";
+        $Data['Producto'] = $Producto;
+        $Data['Fecha_vig'] = $Fecha_vig;
+        set_value("Nombre");
+        $this->load->view('layouts/_menu', $Data);
+        $this->load->view('Productos/QuitasPlazos', $Data);
+        $this->load->view('layouts/footer');
+
+    }
+
+    function QuitasPlazosPost(){
+        if(!VerificarPermisos($this->session->UID, "Productos", "Edit")){
+            $this->session->set_flashdata('logged-message', 'No tiene permisos para entrar a esta opcion. Contacte al administrador.');
+            redirect("");
+        }
+
+        if($this->input->post()){
+            //
+            // Tomar la informacion por metodo post
+            //
+            $Vigencia = $this->input->post("Vigencia");
+            $Producto = $this->input->post("hdProducto");
+            $Detalle = $this->input->post("lstDetalle");
+
+            $TodayDate = unix_to_human(time(), TRUE, 'mx');
+            $LoggedUserId = $this->session->UID;
+
+            // Eliminar todas las Quitas
+            $result = $this->Quitas_plazos_model->DeleteByIdPdto($Producto);
+
+            // actualizamos los registros del detalle
+
+            foreach($Detalle as $Item)
+            { 
+                if($Item["Active"] == 1)
+                {
+                    $Fechatmp= $Vigencia;
+                    $FechaExplode = explode("/", $Fechatmp);
+                    $Fechahora = new DateTime($FechaExplode[2]."-".$FechaExplode[1]."-".$FechaExplode[0]);
+                    $Detalle = array(
+                        "Producto_hsbc" => $Producto,
+                        "Limite_inf" => $Item["Desde"],
+                        "Limite_sup" => $Item["Hasta"],
+                        "Quita_liqtot" => $Item["Quita_liqtot"],
+                        "Quita_2a6" => $Item["Quita_2a6"],
+                        "Quita_7a12" => $Item["Quita_7a12"],
+                        "Vigencia" => $Fechahora->format("Y-m-d"),
+                        "CreatedBy" => $LoggedUserId,
+                        "CreatedDate" => $TodayDate,
+                        "UpdatedBy" => $LoggedUserId,
+                        "UpdatedDate" => $TodayDate                    
+                    );
+                    $result = $this->Quitas_plazos_model->Create($Detalle);
+                }
+            }
+
+            // $this->session->set_flashdata('Producto', $Producto);
+            $this->session->set_flashdata('message_index', 'Se guardaron exitosamente las quitas a plazos del producto ');
+            $this->session->set_flashdata('class', 'success');
+            redirect("Productos");
+        }
+    }
+
+    //
     function AutocompleteClave(){
         $term = strtolower($this->input->get("term"));
         $result = $this->Productos_model->SearchByClave($term);

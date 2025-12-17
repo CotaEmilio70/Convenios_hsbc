@@ -40,6 +40,7 @@
             <th></th>
             <th></th>
             <th></th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -63,6 +64,11 @@
             <td>
                 <?php if(VerificarPermisos($IdUsuario, "Productos", "Edit")){ ?>
                 <a href="<?= base_url() ?>Productos/Quitas/<?= $Producto->Id ?>">Quitas</a>
+                <?php } ?>
+            </td>
+            <td>
+                <?php if(VerificarPermisos($IdUsuario, "Productos", "Edit")){ ?>
+                <a href="<?= base_url() ?>Productos/QuitasPlazos/<?= $Producto->Id ?>">Quitas plazos</a>
                 <?php } ?>
             </td>
         </tr>

@@ -823,14 +823,26 @@ class Convenios extends CI_Controller {
                 $Idpdto = 0;
                 $ObjectResponse['quita_st'] = 0;
                 $ObjectResponse['quita_sc'] = 0;
+                $ObjectResponse['quita_liqtot'] = 0;
+                $ObjectResponse['quita_2a6'] = 0;
+                $ObjectResponse['quita_7a12'] = 0;
 
                 $Rowpdto = $this->Productos_model->GetByNumber($Quita_pdto);
                 if($Rowpdto){
                     $Idpdto = $Rowpdto->Id;
+                    // Tomamos las quitas normales
                     $Rowdiscount = $this->Quitas_model->GetDiscount($Idpdto, $Quita_mesc);
                     if($Rowdiscount){
                         $ObjectResponse['quita_st'] = $Rowdiscount->Quita_st;
                         $ObjectResponse['quita_sc'] = $Rowdiscount->Quita_sc;
+                    }
+                    // Tomamos las quitas a plazos
+                    $RowdiscountPlazos = $this->Quitas_plazos_model->GetDiscount($Idpdto, $Quita_mesc);
+                    if($RowdiscountPlazos){
+                        $ObjectResponse['quita_liqtot'] = $RowdiscountPlazos->Quita_liqtot;
+                        $ObjectResponse['quita_2a6'] = $RowdiscountPlazos->Quita_2a6;
+                        $ObjectResponse['quita_7a12'] = $RowdiscountPlazos->Quita_7a12;
+                        $ObjectResponse['quita_vigencia'] = $RowdiscountPlazos->Vigencia;
                     }
                 }
 
