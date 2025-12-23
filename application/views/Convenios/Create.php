@@ -156,9 +156,9 @@
         <input type="hidden" id="hdPlazosok" name="hdPlazosok" value="0" class="form-control">
         <input type="hidden" id="Grupoconv" name="Grupoconv" value="" class="form-control">
         <input type="hidden" id="Agente" name="Agente" value="" class="form-control">
-        <input type="hidden" id="Quita_liqtot" name="Agente" value="" class="form-control">
-        <input type="hidden" id="Quita_2a6" name="Agente" value="" class="form-control">
-        <input type="hidden" id="Quita_7a12" name="Agente" value="" class="form-control">
+        <input type="hidden" id="Quita_liqtot" name="Quita_liqtot" value="0" class="form-control">
+        <input type="hidden" id="Quita_2a6" name="Quita_2a6" value="0" class="form-control">
+        <input type="hidden" id="Quita_7a12" name="Quita_7a12" value="0" class="form-control">
 
         <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
             <label class="control-label" for="Nombre">Fecha negociacion:</label>
@@ -463,7 +463,7 @@
                 </div>
 
                 <div class="col-md-3 col-sm-3 col-xs-12">
-                    <label class="control-label" for="Periodicidad">Periodicidad:</label>
+                    <label id="lblperiodicidad" class="control-label" for="Periodicidad">Periodicidad:</label>
                     <select class="form-control" name="Periodicidad" id="Periodicidad">
                             <option value="U" style="display:none;" >Pago único</option>
                             <option value="S">Semanal</option>
@@ -972,6 +972,7 @@
             var vMoneda = $("#Moneda").val();
             var vQuitasc = $("#Quita_sc").val();
             var vQuitast = $("#Quita_st").val();
+            var vQuitliqtot = $("#Quita_liqtot").val();
 // 
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
@@ -1046,10 +1047,21 @@
                         if(data.plazo_maximo > 1)
                         {
                             $('#Num_pagos').val(2).removeAttr('readonly');
-                            $('#Periodicidad').val('S').removeAttr('readonly');
+                            if(vQuitliqtot>0)
+                            {
+                                 $('#Periodicidad').val('M').attr('readonly', 'readonly');
+                                 $('#Periodicidad').hide();
+                                 $("#lblperiodicidad").text( "Periodicidad: MENSUAL" );
+                            }else{
+                                $('#Periodicidad').val('S').removeAttr('readonly');
+                                $("#lblperiodicidad").text( "Periodicidad" );
+                                $('#Periodicidad').show();
+                            }
                         }else{
                             $('#Num_pagos').val(1).attr('readonly', 'readonly');
                             $('#Periodicidad').val('U').attr('readonly', 'readonly');
+                            $('#Periodicidad').hide();
+                            $("#lblperiodicidad").text( "Periodicidad: PAGO UNICO" );
                         }
 
                         if(data.solo_parcial == 1){
@@ -1135,7 +1147,7 @@
                     vQuita_compara = 0;
                 }
 
-                bootbox.alert("Quita a comparar: "+vQuita_compara);
+                //bootbox.alert("Quita a comparar: "+vQuita_compara);
 
                 if ( $('input[id="radioContable"]').is(':checked') )
                 {
@@ -1411,9 +1423,9 @@
 
                 if ( vNumpagos == 1 || vMismomes ==1){
                     vQuita_compara = vQuita_liqtot;
-                }else if( vNumpagos <= 2 && vNumpagos <= 6 && vMismomes !=1){
+                }else if( vNumpagos >= 2 && vNumpagos <= 6 && vMismomes !=1){
                     vQuita_compara = vQuita_2a6;
-                }else if( vNumpagos <= 7 && vNumpagos <= 12 && vMismomes !=1){
+                }else if( vNumpagos >= 7 && vNumpagos <= 12 && vMismomes !=1){
                     vQuita_compara = vQuita_7a12;
                 }else{
                     vQuita_compara = 0;
@@ -1574,10 +1586,10 @@
 
                         if( parseFloat(data.quita_liqtot) > 0){
                             $("#lblquitaesphasta").text( 'Quitas especiales vigentes al: '+data.quita_vigencia );
-                            $("#lblquitaesptotal").text( 'Quita liquidacion total: '+parseFloat(data.quita_liqtot).toFixed(2) );
-                            $("#lblquitaesp2a6").text( 'Quita a plazos de 2 a 6 meses: '+parseFloat(data.quita_2a6).toFixed(2) );
-                            $("#lblquitaesp7a12").text( 'Quita a plazos de 7 a 12 meses: '+parseFloat(data.quita_7a12).toFixed(2) );
-                            $('#divquitasespeciales').show();                            
+                            $("#lblquitaesptotal").text( 'Quita liquidacion total: '+parseFloat(data.quita_liqtot).toFixed(2)+'%' );
+                            $("#lblquitaesp2a6").text( 'Quita a plazos de 2 a 6 meses: '+parseFloat(data.quita_2a6).toFixed(2)+'%' );
+                            $("#lblquitaesp7a12").text( 'Quita a plazos de 7 a 12 meses: '+parseFloat(data.quita_7a12).toFixed(2)+'%' );
+                            $('#divquitasespeciales').show();
                         }else{
                             $("#lblquitaesphasta").text( '' );
                             $("#lblquitaesptotal").text( '' );

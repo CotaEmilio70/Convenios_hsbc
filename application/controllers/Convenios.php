@@ -130,6 +130,9 @@ class Convenios extends CI_Controller {
                     "Quita_max_st" => $this->input->post("Quita_st"),
                     "Quita_max_sc" => $this->input->post("Quita_sc"),
                     "Quita_neg" => $this->input->post("Quita_neg"),
+                    "Quita_liqtot" => $this->input->post("Quita_liqtot"),
+                    "Quita_2a6" => $this->input->post("Quita_2a6"),
+                    "Quita_7a12" => $this->input->post("Quita_7a12"),
                     "Estado_conv" => 0,
                     "Folio_pre" => $Folio_pre,
                     "Folio_cons" => $Folio_cons,
@@ -283,6 +286,29 @@ class Convenios extends CI_Controller {
         $Textosaldocontable = "Contable: ".number_format($Convenio->Dmcurbal,2);
         $Textosaldototal = "Total: ".number_format($Convenio->Uxtot_adeu,2);
 
+                // <div id="divquitasespeciales" style="display: none;" class="col-md-6 col-sm-6 col-xs-12">
+                //     <label id="lblquitaesphasta" class="control-label" style="color:#ff0000" >Quitas especiales vigente al: DD/MMM/AAAA </label>
+                //     <label id="lblquitaesptotal" class="control-label" style="color:#ff0000" >Quita liquidacion total: 00.00%</label>
+                //     <label id="lblquitaesp2a6" class="control-label" style="color:#ff0000" >Quita a plazos de 2 a 6 meses: 00.00%</label>
+                //     <label id="lblquitaesp7a12" class="control-label" style="color:#ff0000" >Quita a plazos de 7 a 12 meses: 00.00%</label>
+                // </div>
+
+        if($Convenio->Quita_liqtot > 0){
+            $lblquitaesphasta = "Quitas especiales vigente al: DD/MMM/AAAA";
+            $lblquitaesptotal = "Quita liquidacion total: ".number_format($Convenio->Quita_liqtot,2)."%";
+            $lblquitaesp2a6 = "Quita a plazos de 2 a 6 meses: ".number_format($Convenio->Quita_2a6,2)."%";;
+            $lblquitaesp7a12 = "Quita a plazos de 7 a 12 meses: ".number_format($Convenio->Quita_7a12,2)."%";;
+            $styQuitaespe = "color:red;";
+            $lblQuitaneg = "% de quita negociada: ".number_format($Convenio->Quita_neg,2)." (ESPECIAL)";
+            $styQuitaneg = "color:green;";
+        }else{
+            $lblquitaesphasta = "";
+            $lblquitaesptotal = "";
+            $lblquitaesp2a6 = "";
+            $lblquitaesp7a12 = "";
+            $styQuitaespe = "display: none;";
+        }
+
         $FechaHoraOriginal = $Convenio->Fecha_neg;
         $Hora = substr($FechaHoraOriginal,11,8);
         $Fecha_neg = substr($FechaHoraOriginal,8,2)."/".substr($FechaHoraOriginal,5,2)."/".substr($FechaHoraOriginal,0,4);
@@ -302,6 +328,13 @@ class Convenios extends CI_Controller {
         $Data['Fecha_neg'] = $Fecha_neg;
         $Data['Textosaldocontable'] = $Textosaldocontable;
         $Data['Textosaldototal'] = $Textosaldototal;
+
+        $Data['lblQuitaesphasta'] =  $lblquitaesphasta;
+        $Data['lblQuitaesptotal'] =  $lblquitaesptotal;
+        $Data['lblQuitaesp2a6'] =  $lblquitaesp2a6;
+        $Data['lblQuitaesp7a12'] =  $lblquitaesp7a12;
+        $Data['styQuitaespe'] =  $styQuitaespe;
+
         $this->load->view('layouts/_menu', $Data);
         $this->load->view('Convenios/Edit', $Data);
         $this->load->view('layouts/footer');
@@ -812,12 +845,27 @@ class Convenios extends CI_Controller {
 
                 }
 
-                // Excepcion: en caso de la modalidad 130006 SEGUROS DE AUTO, el producto se cambia a 44 para tomar las quita de AUTO
-                if( $ObjectResponse['modalidad'] == 130006){
+                $Macro_gen = trim($ObjectResponse['macro_gen']);
+
+                // Excepcion: en caso del macrogen SEGUROS_AUTOMOVILES, AUTOMOVILES O MODALIDAD 130006 el producto se cambia a 44 para tomar las quita de AUTO
+                if( $Macro_gen == "SEGUROS_AUTOMOVILES" || $Macro_gen == "AUTOMOVILES" ||  $ObjectResponse['modalidad'] == 130006 ){
                     $Quita_pdto = 44;
                 }else{
                     $Quita_pdto = $ObjectResponse['productoweb'];
                 }
+
+                // if( $Macro_gen == "AUTOMOVILES"){
+                //     $Quita_pdto = 44;
+                // }else{
+                //     $Quita_pdto = $ObjectResponse['productoweb'];
+                // }
+
+                // if( $ObjectResponse['modalidad'] == 130006){
+                //     $Quita_pdto = 44;
+                // }else{
+                //     $Quita_pdto = $ObjectResponse['productoweb'];
+                // }
+
                 $Quita_mesc = $ObjectResponse['mes_castigo'];
 
                 $Idpdto = 0;

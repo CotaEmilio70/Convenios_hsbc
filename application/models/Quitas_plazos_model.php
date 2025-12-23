@@ -19,6 +19,7 @@ class Quitas_plazos_model extends CI_Model {
         $this->db->select('*');
         $this->db->from('tabla_quitas_plazos');
         $this->db->where('Producto_hsbc', $Producto);
+        $this->db->order_by("Id", "ASC");
 
         $Query = $this->db->get();
         return $Query->result();
@@ -26,7 +27,7 @@ class Quitas_plazos_model extends CI_Model {
 
     function GetDiscount($Idproducto, $Mescastigo){
         $TodayDate = unix_to_human(time(), TRUE, 'mx');
-        $TodayDate = $TodayDate.'23:59:59';
+        $TodayDate = substr($TodayDate,0,10);
         $this->db->select('*');
         $this->db->from('tabla_quitas_plazos');
         $this->db->where('Producto_hsbc', $Idproducto);

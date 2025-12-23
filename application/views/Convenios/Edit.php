@@ -1,7 +1,7 @@
-<?php if($this->session->flashdata('message_create')){?>
+<?php if($this->session->flashdata('message_edit')){?>
     <div class="alert alert-<?= $this->session->flashdata('class') ?> alert-dismissible fade in" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-        <?= $this->session->flashdata('message_create') ?>
+        <?= $this->session->flashdata('message_edit') ?>
     </div>
 <?php } ?>
 <?= form_open_multipart('/Convenios/EditPost', array("id" => "frmEdit")) ?>
@@ -162,6 +162,9 @@
         <input type="hidden" id="hdPlazosok" name="hdPlazosok" value="1" class="form-control">
         <input type="hidden" id="Grupoconv" name="Grupoconv" value="<?= $Convenio->Grupoconv ?>" class="form-control">
         <input type="hidden" id="Agente" name="Agente" value="<?= $Convenio->Agente ?>" class="form-control">
+        <input type="hidden" id="Quita_liqtot" name="Quita_liqtot" value="<?= $Convenio->Quita_liqtot ?>" class="form-control">
+        <input type="hidden" id="Quita_2a6" name="Quita_2a6" value="<?= $Convenio->Quita_2a6 ?>" class="form-control">
+        <input type="hidden" id="Quita_7a12" name="Quita_7a12" value="<?= $Convenio->Quita_7a12 ?>" class="form-control">
 
         <div class="col-md-2 col-sm-2 col-xs-12 " id="divfechaneg">
             <label class="control-label" for="Nombre">Fecha negociacion:</label>
@@ -444,19 +447,29 @@
                 </div>
             </div>
 
-            <div id="divsaldos" style="display: none;">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="radioDefault" id="radioContable">
-                    <label class="form-check-label" for="radioContable" id="textoContable">
-                        <?= $Textosaldocontable ?>
-                    </label>
+            <div class="row"  style="margin-bottom:15px;">
+                <div id="divsaldos" style="display: none;" class="col-md-4 col-sm-4 col-xs-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radioDefault" id="radioContable">
+                        <label class="form-check-label" for="radioContable" id="textoContable">
+                            <?= $Textosaldocontable ?>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="radioDefault" id="radioTotal" checked>
+                        <label class="form-check-label" for="radioTotal" id="textoTotal">
+                            <?= $Textosaldototal ?>
+                        </label>
+                    </div>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="radioDefault" id="radioTotal" checked>
-                    <label class="form-check-label" for="radioTotal" id="textoTotal">
-                        <?= $Textosaldototal ?>
-                    </label>
+
+                <div id="divquitasespeciales" style="<?= $styQuitaespe ?>" class="col-md-6 col-sm-6 col-xs-12">
+                    <label id="lblquitaesphasta" class="control-label" style="color:#ff0000" > <?= $lblQuitaesphasta ?> </label>
+                    <label id="lblquitaesptotal" class="control-label" style="color:#ff0000" > <?= $lblQuitaesptotal ?> </label>
+                    <label id="lblquitaesp2a6" class="control-label" style="color:#ff0000" > <?= $lblQuitaesp2a6 ?> </label>
+                    <label id="lblquitaesp7a12" class="control-label" style="color:#ff0000" > <?= $lblQuitaesp7a12?> </label>
                 </div>
+
             </div>
 
             <div class="row">
@@ -477,7 +490,7 @@
                 </div>
 
                 <div class="col-md-3 col-sm-3 col-xs-12">
-                    <label class="control-label" for="Periodicidad">Periodicidad:</label>
+                    <label id="lblperiodicidad" class="control-label" for="Periodicidad">Periodicidad:</label>
                     <select class="form-control" name="Periodicidad" id="Periodicidad">
                             <option value="U" style="display:none;" >Pago único</option>
                             <option value="S">Semanal</option>
@@ -786,8 +799,13 @@
                 $("#lstPartida" + vRow).val(vPartida);
                 vTotalRegistros++;
                 var vCantidad = parseFloat($("#lstPago" + vRow).val());
-                vTotalPago += parseFloat(vCantidad);
-                vPartida++;
+                if (Number.isNaN(vCantidad)) {
+                    bootbox.alert("Existen caracteres inválidos en el importe de la partida "+vPartida+". Asegúrese que solo tenga numeros, sin comas, simbolo de pesos ni otro caracter adicional.");
+                    $("#lstPago" + vRow).val(0);
+                }else{
+                    vTotalPago += parseFloat(vCantidad);
+                    vPartida++;
+                }
             }
         })
         
@@ -804,20 +822,21 @@
             //bootbox.alert("Aqui validamos la suma contra el importe a pagar");
         }
 
-        if(vSoloparcial == 1 && vTotalPago >= (vSaldotot-1)){
+        if(vSoloparcial == 1 && vTotalPago >= (vSaldotot)){
 
-            // bootbox.alert("El importe es suficiente para liquidar la cuenta");
+            bootbox.alert("El importe del pago puede liquidar el saldo actual, la negociacion cambiará a LIQUIDACION SIN DESCUENTO. Haga click en el boton SIMULADOR para completar el proceso.");
+            $("#Clavenego").val(6).change();
 
-            bootbox.confirm({
-                message: "El importe del pago podría liquidar el saldo, desea cambiar la negociacion a LIQUIDACION SIN DESCUENTO?",
-                callback: function(result)
-                {
-                    if(result)
-                    {
-                        $("#Clavenego").val(6).change();
-                    }
-                }
-            }); 
+            // bootbox.confirm({
+            //     message: "El importe del pago podría liquidar el saldo, desea cambiar la negociacion a LIQUIDACION SIN DESCUENTO?",
+            //     callback: function(result)
+            //     {
+            //         if(result)
+            //         {
+            //             $("#Clavenego").val(6).change();
+            //         }
+            //     }
+            // }); 
 
         }
 
@@ -882,15 +901,6 @@
 
     $(function()
     {
-
-        $("#chkAutorizado").change(function()
-        {
-            if( $(this).is(":checked") ){
-                $("#hdAutorizado").val("1");
-            }else{
-                $('#hdAutorizado').val("0");
-            }
-        })
 
         $("#chkFechasesp").change(function()
         {
@@ -989,6 +999,7 @@
             var vMoneda = $("#Moneda").val();
             var vQuitasc = $("#Quita_sc").val();
             var vQuitast = $("#Quita_st").val();
+            var vQuitliqtot = $("#Quita_liqtot").val();
 // 
             $("p.loader-gif").text("Verificando...");
             $(".loader-gif").show();
@@ -1028,6 +1039,7 @@
 
                         $(".loader-gif").hide();
                         $("#lblTiponegociacion").text( data.nombre_nego );
+                        $("#Grupoconv").val( data.clavecrm );
 
                         $("#Soloparcial").val(data.solo_parcial);
                         $("#Plazo_maximo").val(data.plazo_maximo);
@@ -1062,10 +1074,21 @@
                         if(data.plazo_maximo > 1)
                         {
                             $('#Num_pagos').val(2).removeAttr('readonly');
-                            $('#Periodicidad').val('S').removeAttr('readonly');
+                            if(vQuitliqtot>0)
+                            {
+                                 $('#Periodicidad').val('M').attr('readonly', 'readonly');
+                                 $('#Periodicidad').hide();
+                                 $("#lblperiodicidad").text( "Periodicidad: MENSUAL" );
+                            }else{
+                                $('#Periodicidad').val('S').removeAttr('readonly');
+                                $("#lblperiodicidad").text( "Periodicidad" );
+                                $('#Periodicidad').show();
+                            }
                         }else{
                             $('#Num_pagos').val(1).attr('readonly', 'readonly');
                             $('#Periodicidad').val('U').attr('readonly', 'readonly');
+                            $('#Periodicidad').hide();
+                            $("#lblperiodicidad").text( "Periodicidad: PAGO UNICO" );
                         }
 
                         if(data.solo_parcial == 1){
@@ -1107,6 +1130,22 @@
             var vPlazomaximo = parseInt($("#Plazo_maximo").val()); 
             var vNumpag = parseInt($(this).val());
 
+            var vApagar = parseFloat($("#Importeapagar").val());
+            var vQuitaneg = parseFloat($("#Quita_neg").val());
+            var vQuita_st = parseFloat($("#Quita_st").val());
+            var vQuita_sc = parseFloat($("#Quita_sc").val());
+            var vQuita_liqtot = parseFloat($("#Quita_liqtot").val());
+            var vQuita_2a6 = parseFloat($("#Quita_2a6").val());
+            var vQuita_7a12 = parseFloat($("#Quita_7a12").val());
+            var vMismomes = parseInt($("#Mismo_mes").val());
+
+            var vSaldocontab = parseFloat($("#Nsaldocontab").val());
+            var vSaldototal = parseFloat($("#Nsaldototal").val());
+
+            var vEnfacultad = true;
+            var vCondescuento = parseInt( $("#Con_descuento").val() );
+            var vExcepcion = parseInt( $("#hdExcepcion").val() );
+
             if (vPlazomaximo > 1 && vNumpag == 1 )
             {
                 bootbox.alert("Esta negociacion requiere un mínimo de 2 pagos y un máximo de "+vPlazomaximo);
@@ -1119,6 +1158,79 @@
                 $("#Num_pagos").val(vPlazomaximo).focus();
             }
 
+            //bootbox.alert("vApagar: "+vApagar+", vCondescuento: "+vCondescuento+", vQuita_liqtot: "+vQuita_liqtot);
+
+            if(vApagar > 0 && vCondescuento == 1 && vQuita_liqtot > 0){   
+
+                var vQuita_compara = 0;
+
+                if ( vNumpag == 1 || vMismomes ==1){
+                    vQuita_compara = vQuita_liqtot;
+                }else if( vNumpag >= 2 && vNumpag <= 6 && vMismomes !=1){
+                    vQuita_compara = vQuita_2a6;
+                }else if( vNumpag >= 7 && vNumpag <= 12 && vMismomes !=1){
+                    vQuita_compara = vQuita_7a12;
+                }else{
+                    vQuita_compara = 0;
+                }
+
+                //bootbox.alert("Quita a comparar: "+vQuita_compara);
+
+                if ( $('input[id="radioContable"]').is(':checked') )
+                {
+                    var vQuitacalc =  (($("#Nsaldocontab").val() - vApagar )/$("#Nsaldocontab").val())*100  ;
+
+                    $("#Saldo_usado").val('C');
+                    if(vQuitacalc > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita_compara/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+
+                }else{
+                    var vQuitacalc = (($("#Nsaldototal").val() - vApagar )/$("#Nsaldototal").val()) *100 ;
+                    $("#Saldo_usado").val('T');
+                    if(vQuitacalc > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldototal").val() - ($("#Nsaldototal").val() * (vQuita_compara/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+                }
+
+                if(vEnfacultad)
+                {
+                    $("#Quita_neg").val(vQuitacalc.toFixed(2));
+
+                    if(vApagar < vPagocalc )
+                    {
+                        bootbox.alert("Por regla, el importe se ajustará de acuerdo los criterios del banco.");
+                        $("#Importeapagar").val(vPagocalc);
+                    }else{
+                        $("#Importeapagar").val(Math.ceil(vApagar));
+                    }
+
+                }else{
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuitacalc.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuitacalc+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                            $("#Quita_neg").val(0);
+                        }else{
+                            $("#Quita_neg").val(vQuitacalc.toFixed(2));
+                        }
+                        
+                    }else{
+                        bootbox.alert("El importe excede el maximo de quita autorizada, revise importe y plazos");
+                        $("#Quita_neg").val(0);
+                    }
+                }
+            }
+
         })  
 
         $("#Importeapagar").change(function()
@@ -1127,6 +1239,11 @@
             var vApagar = $(this).val();
             var vQuita_st = parseFloat($("#Quita_st").val());
             var vQuita_sc = parseFloat($("#Quita_sc").val());
+            var vQuita_liqtot = parseFloat($("#Quita_liqtot").val());
+            var vQuita_2a6 = parseFloat($("#Quita_2a6").val());
+            var vQuita_7a12 = parseFloat($("#Quita_7a12").val());
+            var vNumpagos = parseInt($("#Num_pagos").val());
+            var vMismomes = parseInt($("#Mismo_mes").val());
 
             var vSaldocontab = parseFloat($("#Nsaldocontab").val());
             var vSaldototal = parseFloat($("#Nsaldototal").val());
@@ -1135,7 +1252,7 @@
             var vCondescuento = parseInt( $("#Con_descuento").val() );
             var vExcepcion = parseInt( $("#hdExcepcion").val() );
 
-            if (vApagar > 0 && vCondescuento == 1)
+            if (vApagar > 0 && vCondescuento == 1 && vQuita_liqtot <= 0)
             {
 
                 if ( $('input[id="radioContable"]').is(':checked') )
@@ -1192,12 +1309,80 @@
                     }
                 }
 
+            }else if(vApagar > 0 && vCondescuento == 1 && vQuita_liqtot > 0){             
+//
+                var vQuita_compara = 0;
+
+                if ( vNumpagos == 1 || vMismomes ==1){
+                    vQuita_compara = vQuita_liqtot;
+                }else if( vNumpagos >= 2 && vNumpagos <= 6 && vMismomes !=1){
+                    vQuita_compara = vQuita_2a6;
+                }else if( vNumpagos >= 7 && vNumpagos <= 12 && vMismomes !=1){
+                    vQuita_compara = vQuita_7a12;
+                }else{
+                    vQuita_compara = 0;
+                }
+
+                if ( $('input[id="radioContable"]').is(':checked') )
+                {
+                    var vQuitacalc =  (($("#Nsaldocontab").val() - vApagar )/$("#Nsaldocontab").val())*100  ;
+
+                    $("#Saldo_usado").val('C');
+                    if(vQuitacalc > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita_compara/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+
+                }else{
+                    var vQuitacalc = (($("#Nsaldototal").val() - vApagar )/$("#Nsaldototal").val()) *100 ;
+                    $("#Saldo_usado").val('T');
+                    if(vQuitacalc > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }else{
+                        var vPagocalc =  $("#Nsaldototal").val() - ($("#Nsaldototal").val() * (vQuita_compara/100))  ;
+                        vPagocalc =  Math.ceil(vPagocalc)+1;
+                    }
+                }
+
+                if(vEnfacultad)
+                {
+                    $("#Quita_neg").val(vQuitacalc.toFixed(2));
+
+                    if(vApagar < vPagocalc )
+                    {
+                        bootbox.alert("Por regla, el importe se ajustará de acuerdo los criterios del banco.");
+                        $("#Importeapagar").val(vPagocalc);
+                    }else{
+                        $("#Importeapagar").val(Math.ceil(vApagar));
+                    }
+
+                }else{
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuitacalc.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuitacalc+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                            $("#Quita_neg").val(0);
+                        }else{
+                            $("#Quita_neg").val(vQuitacalc.toFixed(2));
+                        }
+                        
+                    }else{
+                        bootbox.alert("El importe excede el maximo de quita autorizada, revise importe y plazos");
+                        $("#Quita_neg").val(0);
+                    }
+                }
+//
             }else{
                 $("#Quita_neg").val(0);
             }
 
         })    
-//
+
         $("#Quita_neg").change(function()
         {
             var vQuita = parseFloat($(this).val());
@@ -1205,9 +1390,14 @@
             var vQuita_sc = parseFloat($("#Quita_sc").val());
             var vCondescuento = parseInt( $("#Con_descuento").val() );
             var vExcepcion = parseInt( $("#hdExcepcion").val() );
+            var vQuita_liqtot = parseFloat($("#Quita_liqtot").val());
+            var vQuita_2a6 = parseFloat($("#Quita_2a6").val());
+            var vQuita_7a12 = parseFloat($("#Quita_7a12").val());
+            var vNumpagos = parseInt($("#Num_pagos").val());
+            var vMismomes = parseInt($("#Mismo_mes").val());
             var vEnfacultad = true;
 
-            if (vQuita > 0 && vCondescuento == 1)
+            if (vQuita > 0 && vCondescuento == 1 && vQuita_liqtot <= 0)
             {
                 if ( $('input[id="radioContable"]').is(':checked') )
                 {
@@ -1254,13 +1444,66 @@
                 //     $("#Importeapagar").val(0);
                 // }
 
+            }else if( vQuita > 0 && vCondescuento == 1 && vQuita_liqtot > 0 ){
+//
+                var vQuita_compara = 0;
+
+                if ( vNumpagos == 1 || vMismomes ==1){
+                    vQuita_compara = vQuita_liqtot;
+                }else if( vNumpagos >= 2 && vNumpagos <= 6 && vMismomes !=1){
+                    vQuita_compara = vQuita_2a6;
+                }else if( vNumpagos >= 7 && vNumpagos <= 12 && vMismomes !=1){
+                    vQuita_compara = vQuita_7a12;
+                }else{
+                    vQuita_compara = 0;
+                }
+
+                if ( $('input[id="radioContable"]').is(':checked') )
+                {
+                    var vPagocalc =  $("#Nsaldocontab").val() - ($("#Nsaldocontab").val() * (vQuita/100))  ;
+                    vPagocalc =  Math.ceil(vPagocalc)+1;
+
+                    $("#Saldo_usado").val('C');
+                    if(vQuita > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }
+                }else{
+                    var vPagocalc = $("#Nsaldototal").val() - ($("#Nsaldototal").val() * (vQuita/100))  ;
+                    vPagocalc =  Math.ceil(vPagocalc)+1;
+
+                    $("#Saldo_usado").val('T');
+                    if(vQuita > vQuita_compara)
+                    {
+                        vEnfacultad =false;
+                    }
+                }
+
+                if(vEnfacultad)
+                {
+                    $("#Importeapagar").val(vPagocalc.toFixed(2));
+                }else{
+                    if(vExcepcion == 1)
+                    {
+                        vQuitacalc = parseFloat(vQuita.toFixed(2));
+                        if(vQuitacalc > 95){
+                            bootbox.alert("La quita otorgada: "+vQuita+", excede el 95% (maximo permitido aun en caso de excepciones).");
+                           $("#Importeapagar").val(0);
+                        }else{
+                            $("#Importeapagar").val(vPagocalc.toFixed(2));
+                        }
+                    }else{
+                        bootbox.alert("El % indicado excede el maximo de quita autorizada, revise el % de quita y los plazos");
+                       $("#Importeapagar").val(0);
+                    }
+                }
+//
             }else{
                 $("#Importeapagar").val(0);
             }
 
         })    
 
-//
         $('input[name="radioDefault"]').change(function()
         {
             var vCondescuento = parseInt( $("#Con_descuento").val() );
@@ -1363,6 +1606,24 @@
 
                         $("#Quita_st").val( data.quita_st );
                         $("#Quita_sc").val( data.quita_sc );
+
+                        $("#Quita_liqtot").val( data.quita_liqtot );
+                        $("#Quita_2a6").val( data.quita_2a6 );
+                        $("#Quita_7a12").val( data.quita_7a12 );
+
+                        if( parseFloat(data.quita_liqtot) > 0){
+                            $("#lblquitaesphasta").text( 'Quitas especiales vigentes al: '+data.quita_vigencia );
+                            $("#lblquitaesptotal").text( 'Quita liquidacion total: '+parseFloat(data.quita_liqtot).toFixed(2) );
+                            $("#lblquitaesp2a6").text( 'Quita a plazos de 2 a 6 meses: '+parseFloat(data.quita_2a6).toFixed(2) );
+                            $("#lblquitaesp7a12").text( 'Quita a plazos de 7 a 12 meses: '+parseFloat(data.quita_7a12).toFixed(2) );
+                            $('#divquitasespeciales').show();
+                        }else{
+                            $("#lblquitaesphasta").text( '' );
+                            $("#lblquitaesptotal").text( '' );
+                            $("#lblquitaesp2a6").text( '' );
+                            $("#lblquitaesp7a12").text( '' );
+                            $('#divquitasespeciales').hide();                            
+                        }
 
                         $("#Pago_minimo").val( addCommas(data.pago_minimo));
                         $("#Saldo_corte").val( addCommas(data.saldo_corte));
@@ -1976,9 +2237,8 @@
 
         $("#frmEdit").submit(function()
         {
-            // bootbox.alert("SI LLEGO AL SUBMIT");
 
-            // $("#hdTriedSave").val("true");
+            $("#hdTriedSave").val("true");
             var vSubmit = true;
             var vSoloparcial = $("#Soloparcial").val();
             var vPagototal = parseFloat($("#nTotalpago").val());
